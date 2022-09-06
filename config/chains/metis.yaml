@@ -1,0 +1,8 @@
+name: Metis Andromeda
+description: "Metis is an EVM-equivalent Scaling Solution originally forked from Optimism. It provides support for multiple, interconnected L2 chains with main focus on supporting easy creation of DACs (Decentralized Autonomous Companies). The risk analysis below relates to the default chain with chainId=1088 called Andromeda. Since April 2022 Andromeda uses \"optimistic data availability\" scheme in which transaction data is kept off-chain in MEMO while Validators can request tx data from Sequencer via L1 challenge mechanism if it does not make it available for validation off-chain."
+tokens:
+- Metis
+bridges:
+- address: 0x3980c9ed79d2c191A89E02Fa3529C60eD6e9c04b
+  tokens: []
+nonNativeBridges: []

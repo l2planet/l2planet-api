@@ -1,0 +1,6 @@
+name: "ZKSwap 2.0"
+description: "ZKSwap is a fork of ZkSync with added AMM functionality. Based on ZK-Rollup technology, ZKSwap aims to execute the full functionality of Uniswap on Layer 2, while ensuring the core value of decentralized exchange. ZKSwap aims to increase the TPS by multiple orders of magnitude compared to Uniswap, and make transaction processing hardly consume any gas fees."
+bridges:
+- address: 0x6dE5bDC580f55Bc9dAcaFCB67b91674040A247e3
+  tokens: []
+nonNativeBridges: []

@@ -1,0 +1,9 @@
+name: "Fuel v1"
+description: "Fuel aims to be a complete optimistic rollup with low transaction costs, high speed and high throughput."
+bridges:
+- address: 0x6880f6Fd960D1581C2730a451A22EED1081cfD72
+  tokens:
+  - DAI
+  - USDC
+  - USDT
+nonNativeBridges: []

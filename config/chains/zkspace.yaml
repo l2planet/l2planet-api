@@ -1,0 +1,6 @@
+name: "ZKSpace"
+description: "The ZKSpace platform consists of three main parts: a Layer 2 AMM DEX utilizing ZK-Rollups technology ZKSwap v3, a payment service called ZKSquare, and an NFT marketplace called ZKSea."
+bridges:
+- address: 0x5CDAF83E077DBaC2692b5864CA18b61d67453Be8
+  tokens: []
+nonNativeBridges: []

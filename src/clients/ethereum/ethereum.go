@@ -23,6 +23,10 @@ func NewClient(url string) *Client {
 	}
 }
 
+func (client *Client) MulticallBalanceAt(address []string) {
+	//client.Client.
+}
+
 func (client *Client) BalanceAt(address string) (*big.Int, error) {
 	account := common.HexToAddress(address)
 	balance, err := client.Client.BalanceAt(context.Background(), account, nil)

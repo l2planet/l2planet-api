@@ -1,0 +1,11 @@
+name: "Boba Network"
+description: "Boba is an L2 Ethereum scaling & augmenting solution built by the Enya team as core contributors to the OMG Foundation. Boba is an Optimistic Rollup forked from Optimism. Amongst other features it adds standard fast withdrawal facility that allows users to remove funds immediately without waiting for the end of the 7-day fraud proof window. This facility is using funds from liquidity providers."
+tokens:
+- OMG
+- BOBA
+bridges:
+- address: 0xdc1664458d2f0B6090bEa60A8793A4E66c2F1c00
+  tokens: []
+- address: 0x1A26ef6575B7BBB864d984D9255C069F6c361a14
+  tokens: []
+nonNativeBridges: []

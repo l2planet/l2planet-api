@@ -1,0 +1,20 @@
+name: "Optimism"
+tokens:
+- OP
+description: "Optimistic Ethereum is an EVM-compatible Optimistic Rollup chain. It aims to be fast, simple, and secure. With the Nov 2021 upgrade to \"EVM equivalent\" OVM 2.0 old fraud proof system has been disabled while the new fraud-proof system is being built (https://github.com/geohot/cannon)."
+bridges:
+- address: 0x045e507925d2e05D114534D0810a1abD94aca8d6
+  tokens:
+  - SNX
+- address: 0x5Fd79D46EBA7F351fe49BFF9E87cdeA6c821eF9f
+  tokens:
+  - SNX
+- address: 0xCd9D4988C0AE61887B075bA77f08cbFAd2b65068
+  tokens:
+  - SNX
+- address: 0x467194771dAe2967Aef3ECbEDD3Bf9a310C76C65
+  tokens:
+  - DAI
+- address: 0x99C9fc46f92E8a1c0deC1b1747d010903E884bE1
+  tokens: []
+nonNativeBridges: []

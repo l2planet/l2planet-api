@@ -1,0 +1,6 @@
+name: "zkSync"
+description: "zkSync is a user-centric zk rollup platform from Matter Labs. It is a scaling solution for Ethereum, already live on Ethereum mainnet. It supports payments, token swaps and NFT minting."
+bridges:
+- address: 0xaBEA9132b05A70803a4E85094fD0e1800777fBEF
+  tokens: []
+nonNativeBridges: []

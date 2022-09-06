@@ -1,5 +1,9 @@
-name: Arbitrum
+name: Arbitrum One
+description: "Arbitrum is an Optimistic Rollup that aims to feel exactly like interacting with Ethereum, but with transactions costing a fraction of what they do on L1."
 bridges:
+- address: 0x8315177aB297bA92A06054cE80a67Ed4DBd7ed3a
+  tokens:
+  - ETH
 - address: 0x011B6E24FfB0B5f5fCc564cf4183C5BBBc96D515
   tokens: 
   - ETH
@@ -10,3 +14,4 @@ bridges:
   tokens:  []
 - address: 0xa3A7B6F88361F48403514059F1F16C8E78d60EeC
   tokens: []
+nonNativeBridges: []

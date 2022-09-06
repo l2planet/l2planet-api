@@ -1,0 +1,15 @@
+name: "Gluon"
+description: "Gluon aims to be a Layer 2 scalable trading engine built on top of Ethereum, unlocking low fees and high frequency trading."
+tokens:
+- L2
+bridges:
+- address: 0x75ACe7a086eA0FB1a79e43Cc6331Ad053d8C67cB
+  tokens:
+  - ETH
+  - DAI
+  - L2
+- address: 0x84e34fD82FC368F1a072075114AdC4b552a7a1F4
+  tokens:
+  - DAI
+  - USDT
+nonNativeBridges: []

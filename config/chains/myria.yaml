@@ -1,0 +1,7 @@
+name: "Myria"
+description: "Myria is an expansive blockchain gaming ecosystem, comprised of a blockchain gaming hub and Myriaverse metaverse, underpinned by a full suite of Myria infrastructure. Myria will also offer B2B services to enable third-party studios and developers to onboard onto the Myria chain."
+bridges:
+- address: 0x3071BE11F9e92A9eb28F305e1Fa033cD102714e7
+  tokens:
+  - ETH
+nonNativeBridges: []

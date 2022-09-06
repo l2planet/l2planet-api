@@ -6,11 +6,13 @@ import (
 	"math"
 	"math/big"
 	"os"
-
-	"gopkg.in/yaml.v2"
+	"time"
 
 	"github.com/l2planet/l2planet-api/src/clients/coingecko"
+	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/clients/ethereum"
+	"github.com/l2planet/l2planet-api/src/consts"
+	"github.com/l2planet/l2planet-api/src/models"
 )
 
 type BridgeConfig struct {
@@ -19,8 +21,10 @@ type BridgeConfig struct {
 }
 
 type ChainConfig struct {
-	Bridges []BridgeConfig `yaml:"bridges"`
-	Name    string         `yaml:"name"`
+	Bridges     []BridgeConfig `yaml:"bridges"`
+	Name        string         `yaml:"name"`
+	Tokens      []string       `yaml:"tokens"`
+	Description string         `yaml:"description"`
 }
 
 type TokenConfig struct {
@@ -31,16 +35,6 @@ type TokenConfig struct {
 	Symbol      string `json:"symbol"`
 	Decimals    int    `json:"decimals"`
 	Category    string `json:"category"`
-}
-
-func getChainConfig() (ChainConfig, error) {
-	dat, _ := os.ReadFile("./config/chains/arbitrum.yaml")
-	var chainConfig ChainConfig
-	if err := yaml.Unmarshal(dat, &chainConfig); err != nil {
-		return ChainConfig{}, err
-	}
-
-	return chainConfig, nil
 }
 
 func getTokenConfig() (map[string]TokenConfig, []string, error) {
@@ -62,60 +56,100 @@ func getTokenConfig() (map[string]TokenConfig, []string, error) {
 
 // TODO: instead of querying blockchain one by one, use multicall
 func CalculateTvl() {
-	chainConfig, _ := getChainConfig()
+	ts := time.Now()
+	solutionConfigs, _ := db.GetClient().GetSolutionConfig()
 	tokenConfig, cgSymbolList, _ := getTokenConfig()
-	tvl := big.NewFloat(0.00)
-	ethClient := ethereum.NewClient("https://mainnet.infura.io/v3/0730731b37714d7bafe59025a5cbe455")
+	ethClient := ethereum.NewClient(consts.EthClientUrl)
 	coinGeckoClient := coingecko.NewClient()
+
 	prices, _ := coinGeckoClient.GetPrices(cgSymbolList)
+	tvl := big.NewFloat(0.00)
 
-	for _, bridge := range chainConfig.Bridges {
-		if len(bridge.Tokens) == 0 {
-			for name, _ := range tokenConfig {
-				balance, _ := ethClient.BalanceOf(bridge.Address, tokenConfig[name].Address)
-				fbalance := new(big.Float)
-				fbalance.SetString(balance.String())
-				tokenValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(tokenConfig[name].Decimals)))
-				coingeckoId := tokenConfig[name].CoingeckoId
-				price := (*prices)[coingeckoId]["usd"]
+	for _, solution := range solutionConfigs {
+		for _, bridge := range solution.Bridges {
+			var bridgeModel models.Bridge
+			db.GetDbClient().First(&bridgeModel, "contract_adress = ?", bridge.ContractAdress)
 
-				bigPrice := big.NewFloat(float64(price))
-				value := bigPrice.Mul(bigPrice, tokenValue)
-				tvl = tvl.Add(tvl, value)
-			}
-			continue
-		}
+			//if No tokens specified, go over all of them, else iterate over the specified list
+			if len(bridge.SupportedTokens) == 0 {
+				for name, _ := range tokenConfig {
+					balance, err := getBalance(ethClient, bridge.ContractAdress, tokenConfig[name].Address, tokenConfig[name].Decimals)
+					if err != nil {
+						fmt.Printf("balance of the %s token cannot be found: %v \n", name, err)
+						continue
+					}
 
-		for _, tokenName := range bridge.Tokens {
-			if tokenName == "ETH" {
-				balance, err := ethClient.BalanceAt(bridge.Address)
-				if err != nil {
-					fmt.Println(err)
-					return
+					//Get Price of the asset
+					coingeckoId := tokenConfig[name].CoingeckoId
+					price := (*prices)[coingeckoId]["usd"]
+					bigPrice := big.NewFloat(float64(price))
+
+					//calculate total value
+					value := bigPrice.Mul(bigPrice, balance)
+					tvl = tvl.Add(tvl, value)
+					db.GetDbClient().Create(&models.Balance{
+						Symbol:    name,
+						Value:     balance.String(),
+						Timestamp: ts,
+						BridgeID:  bridgeModel.ID,
+					})
 				}
-				fbalance := new(big.Float)
-				fbalance.SetString(balance.String())
-				ethValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(18)))
-				price := (*prices)["ethereum"]["usd"]
-				bigPrice := big.NewFloat(float64(price))
-				value := bigPrice.Mul(bigPrice, ethValue)
-				tvl = tvl.Add(tvl, value)
 			} else {
-				balance, err := ethClient.BalanceOf(bridge.Address, tokenConfig[tokenName].Address)
-				if err != nil {
-					fmt.Println(err)
-					return
+				for _, tokenName := range bridge.SupportedTokens {
+
+					balance, err := getBalance(ethClient, bridge.ContractAdress, tokenConfig[tokenName].Address, tokenConfig[tokenName].Decimals)
+					if err != nil {
+						fmt.Printf("balance of the %s token cannot be found: %v \n", tokenName, err)
+						continue
+					}
+
+					coingeckoId := tokenConfig[tokenName].CoingeckoId
+					price := (*prices)[coingeckoId]["usd"]
+					bigPrice := big.NewFloat(float64(price))
+
+					value := bigPrice.Mul(bigPrice, balance)
+					tvl = tvl.Add(tvl, value)
+
+					db.GetDbClient().Create(&models.Balance{
+						Symbol:    tokenName,
+						Value:     balance.String(),
+						Timestamp: ts,
+						BridgeID:  bridgeModel.ID,
+					})
+
 				}
-				fbalance := new(big.Float)
-				fbalance.SetString(balance.String())
-				tokenValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(tokenConfig[tokenName].Decimals)))
-				coingeckoId := tokenConfig[tokenName].CoingeckoId
-				price := (*prices)[coingeckoId]["usd"]
-				bigPrice := big.NewFloat(float64(price))
-				value := bigPrice.Mul(bigPrice, tokenValue)
-				tvl = tvl.Add(tvl, value)
 			}
+			db.GetDbClient().Create(&models.Tvl{
+				Value:     tvl.String(),
+				Timestamp: ts,
+				BridgeID:  bridgeModel.ID,
+			})
 		}
 	}
-	fmt.Println(tvl)
+}
+
+func getBalance(ethClient *ethereum.Client, bridgeAddress, tokenAddress string, decimals int) (*big.Float, error) {
+	if tokenAddress == "" {
+		balance, err := ethClient.BalanceAt(bridgeAddress)
+		if err != nil {
+			return nil, err
+		}
+
+		fbalance := new(big.Float)
+		fbalance.SetString(balance.String())
+		ethValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(decimals)))
+		return ethValue, nil
+	}
+
+	balance, err := ethClient.BalanceOf(bridgeAddress, tokenAddress)
+	if err != nil {
+		return nil, err
+	}
+
+	fbalance := new(big.Float)
+	fbalance.SetString(balance.String())
+	tokenValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(decimals)))
+
+	return tokenValue, nil
+
 }

@@ -1,0 +1,7 @@
+name: "Sorare"
+description: "Sorare is a global fantasy football game where you can play with officially licensed digital cards and earn prizes every week."
+bridges:
+- address: 0xF5C9F957705bea56a7e806943f98F7777B995826
+  tokens:
+  - ETH
+nonNativeBridges: []

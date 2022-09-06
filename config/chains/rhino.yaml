@@ -1,0 +1,6 @@
+name: "rhino.fi"
+description: "rhino.fi (formerly DeversiFi) claims to be the easiest way to access DeFi opportunities on Ethereum: invest, trade, and send tokens without paying gas fees."
+bridges:
+- address: 0x5d22045DAcEAB03B158031eCB7D9d06Fad24609b
+  tokens: []
+nonNativeBridges: []
