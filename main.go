@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Newsletter{}, &models.Price{}, &models.Tvl{})
+	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{})
 	//db.GetClient().GetAllSolutionsWithTvl()
 
 	//db.GetClient().SyncDb()
@@ -21,6 +21,9 @@ func main() {
 	r := gin.Default()
 
 	r.GET("/info", controllers.Info)
+	r.POST("/solution", controllers.NewSolution)
+	r.POST("/project", controllers.NewProject)
+	r.POST("/chain", controllers.NewChain)
 
 	r.Run()
 
