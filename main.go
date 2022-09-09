@@ -1,21 +1,27 @@
 package main
 
 import (
-	"fmt"
-	"time"
-
+	"github.com/gin-gonic/gin"
 	"github.com/l2planet/l2planet-api/src/clients/db"
-	"github.com/l2planet/l2planet-api/src/controllerloops"
+	"github.com/l2planet/l2planet-api/src/controllers"
 	"github.com/l2planet/l2planet-api/src/models"
 )
 
 func main() {
 
-	db.GetDbClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{}, &models.Balance{}, &models.Blog{}, &models.Price{}, &models.Tvl{})
-	db.GetClient().SyncDb()
-	start := time.Now()
+	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Newsletter{}, &models.Price{}, &models.Tvl{})
+	//db.GetClient().GetAllSolutionsWithTvl()
+
+	//db.GetClient().SyncDb()
+	/*start := time.Now()
 	controllerloops.CalculateTvl()
 	elapsed := time.Since(start)
+	fmt.Printf("calculate tvl took %s", elapsed)*/
 
-	fmt.Printf("calculate tvl took %s", elapsed)
+	r := gin.Default()
+
+	r.GET("/info", controllers.Info)
+
+	r.Run()
+
 }

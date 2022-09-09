@@ -63,16 +63,17 @@ func CalculateTvl() {
 	coinGeckoClient := coingecko.NewClient()
 
 	prices, _ := coinGeckoClient.GetPrices(cgSymbolList)
-	tvl := big.NewFloat(0.00)
 
 	for _, solution := range solutionConfigs {
 		for _, bridge := range solution.Bridges {
+			tvl := big.NewFloat(0.00)
 			var bridgeModel models.Bridge
-			db.GetDbClient().First(&bridgeModel, "contract_adress = ?", bridge.ContractAdress)
+			db.GetClient().First(&bridgeModel, "contract_adress = ?", bridge.ContractAdress)
 
 			//if No tokens specified, go over all of them, else iterate over the specified list
 			if len(bridge.SupportedTokens) == 0 {
-				for name, _ := range tokenConfig {
+				for name := range tokenConfig {
+
 					balance, err := getBalance(ethClient, bridge.ContractAdress, tokenConfig[name].Address, tokenConfig[name].Decimals)
 					if err != nil {
 						fmt.Printf("balance of the %s token cannot be found: %v \n", name, err)
@@ -87,12 +88,13 @@ func CalculateTvl() {
 					//calculate total value
 					value := bigPrice.Mul(bigPrice, balance)
 					tvl = tvl.Add(tvl, value)
-					db.GetDbClient().Create(&models.Balance{
+					/*persistedBalance, _ := balance.Float64()
+					db.GetClient().Create(&models.Balance{
 						Symbol:    name,
-						Value:     balance.String(),
+						Value:     persistedBalance,
 						Timestamp: ts,
 						BridgeID:  bridgeModel.ID,
-					})
+					})*/
 				}
 			} else {
 				for _, tokenName := range bridge.SupportedTokens {
@@ -109,18 +111,20 @@ func CalculateTvl() {
 
 					value := bigPrice.Mul(bigPrice, balance)
 					tvl = tvl.Add(tvl, value)
-
-					db.GetDbClient().Create(&models.Balance{
-						Symbol:    tokenName,
-						Value:     balance.String(),
-						Timestamp: ts,
-						BridgeID:  bridgeModel.ID,
-					})
-
+					/*
+						persistedBalance, _ := balance.Float64()
+						db.GetClient().Create(&models.Balance{
+							Symbol:    tokenName,
+							Value:     persistedBalance,
+							Timestamp: ts,
+							BridgeID:  bridgeModel.ID,
+						})
+					*/
 				}
 			}
-			db.GetDbClient().Create(&models.Tvl{
-				Value:     tvl.String(),
+			persistedTvl, _ := tvl.Float64()
+			db.GetClient().Create(&models.Tvl{
+				Value:     persistedTvl,
 				Timestamp: ts,
 				BridgeID:  bridgeModel.ID,
 			})
