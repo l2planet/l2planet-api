@@ -99,13 +99,13 @@ func (c *Client) GetSolutionConfig() ([]models.Solution, error) {
 }
 
 func (c *Client) SyncDb() error {
-	files, err := os.ReadDir("./config/chains")
+	files, err := os.ReadDir("./config/solutions")
 	if err != nil {
 		panic(err)
 	}
 
 	for _, file := range files {
-		dat, _ := os.ReadFile("./config/chains/" + file.Name())
+		dat, _ := os.ReadFile("./config/solutions/" + file.Name())
 		var chainConfig SolutionConfig
 		if err := yaml.Unmarshal(dat, &chainConfig); err != nil {
 			panic(err)
