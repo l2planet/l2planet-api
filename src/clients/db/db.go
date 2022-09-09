@@ -79,6 +79,16 @@ func (c *Client) GetAllProjects() ([]models.Project, error) {
 	return projects, nil
 }
 
+func (c *Client) GetLatestNewsletter() (models.Newsletter, error) {
+	var newsletter models.Newsletter
+
+	if err := c.Raw("SELECT * FROM newsletter ORDER BY created_at DESC LIMIT 1").Scan(&newsletter).Error; err != nil {
+		return models.Newsletter{}, err
+	}
+
+	return newsletter, nil
+}
+
 func (c *Client) GetAllSolutionsWithTvl() ([]SolutionWithTvl, error) {
 	var solutionWithTvls []SolutionWithTvl
 	err := c.Raw("SELECT * FROM solution INNER JOIN (SELECT DISTINCT ON(bridges.solution_id) bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id").Scan(&solutionWithTvls).Error

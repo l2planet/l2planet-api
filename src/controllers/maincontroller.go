@@ -81,6 +81,13 @@ func Info(c *gin.Context) {
 		return
 	}
 
+	newsletter, err := db.GetClient().GetLatestNewsletter()
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
 	chainsByte, err := json.Marshal(chains)
 	if err != nil {
 
@@ -102,10 +109,18 @@ func Info(c *gin.Context) {
 		return
 	}
 
+	newsletterByte, err := json.Marshal(newsletter)
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
 	c.JSON(
 		http.StatusOK, gin.H{
-			"chains":    string(chainsByte),
-			"solutions": string(solutionsWithTvlbyte),
-			"projects":  string(projectByte),
+			"chains":            string(chainsByte),
+			"solutions":         string(solutionsWithTvlbyte),
+			"projects":          string(projectByte),
+			"latest_newsletter": string(newsletterByte),
 		})
 }
