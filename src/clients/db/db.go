@@ -82,7 +82,7 @@ func (c *Client) GetAllProjects() ([]models.Project, error) {
 func (c *Client) GetLatestNewsletter() (models.Newsletter, error) {
 	var newsletter models.Newsletter
 
-	if err := c.Raw("SELECT * FROM newsletter ORDER BY created_at DESC LIMIT 1").Scan(&newsletter).Error; err != nil {
+	if err := c.Raw("SELECT * FROM newsletters ORDER BY created_at DESC LIMIT 1").Scan(&newsletter).Error; err != nil {
 		return models.Newsletter{}, err
 	}
 

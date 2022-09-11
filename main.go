@@ -24,6 +24,7 @@ func main() {
 	r.POST("/solution", controllers.NewSolution)
 	r.POST("/project", controllers.NewProject)
 	r.POST("/chain", controllers.NewChain)
+	r.POST("/newsletter", controllers.NewNewsletter)
 
 	r.Run()
 
