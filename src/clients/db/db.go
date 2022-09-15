@@ -1,13 +1,19 @@
 package db
 
 import (
+	"context"
 	"os"
 
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/l2planet/l2planet-api/src/models"
 	"github.com/lib/pq"
 	"gopkg.in/yaml.v2"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+)
+
+const (
+	databaseUrl = "host=l2planet_db user=postgres password=123456789 dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 )
 
 type BridgeConfig struct {
@@ -41,19 +47,25 @@ var client *Client
 
 type Client struct {
 	*gorm.DB
+	*pgxpool.Pool
 }
 
 func GetClient() *Client {
 	if client == nil {
 		dbInstance, err := gorm.Open(postgres.New(postgres.Config{
-			DSN:                  "host=localhost user=postgres password=123456789 dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai",
+			DSN:                  databaseUrl,
 			PreferSimpleProtocol: true, // disables implicit prepared statement usage
 		}), &gorm.Config{})
 		if err != nil {
 			panic(err.Error())
 		}
+		dbPool, err := pgxpool.Connect(context.Background(), databaseUrl)
+		if err != nil {
+			panic(err.Error())
+		}
 		client = &Client{
-			DB: dbInstance,
+			DB:   dbInstance,
+			Pool: dbPool,
 		}
 	}
 	return client
@@ -66,6 +78,22 @@ func (c *Client) GetAllChains() ([]models.Chain, error) {
 		return nil, err
 	}
 
+	/*
+		rows, err := c.Pool.Query(context.Background(), "SELECT * FROM chains")
+		if err != nil {
+			return nil, err
+		}
+		for rows.Next() {
+			chain := models.Chain{}
+			err := rows.Scan(chain.ID, chain.CreatedAt, chain.UpdatedAt, chain.DeletedAt, chain.Icon, chain.Name, &chain.Description, &chain.EvmID, &chain.Solutions)
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+			chains = append(chains, chain)
+
+		}
+	*/
 	return chains, nil
 }
 

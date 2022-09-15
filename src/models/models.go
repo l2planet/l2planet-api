@@ -9,9 +9,10 @@ import (
 
 type Chain struct {
 	gorm.Model
-	Icon        string         `json:"icon"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
+	Icon        string `json:"icon"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	EvmID       int
 	Solutions   pq.StringArray `json:"solutions" gorm:"type:text[]"`
 }
 
@@ -30,6 +31,7 @@ type Solution struct {
 	Tokens      pq.StringArray `gorm:"type:text[]"`
 	Bridges     []Bridge
 	Projects    pq.StringArray `gorm:"type:text[]"`
+	EvmID       int
 	//ChainID     uint
 }
 

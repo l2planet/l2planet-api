@@ -1,0 +1,24 @@
+version: '3.3'
+
+services:
+  api-v1:
+    container_name: api-v1
+    image: docker.io/bdehrioglu/l2planet-api:v0.1.0
+    restart: always
+    ports:
+      - "127.0.0.1:80:8080"
+    depends_on:
+      - l2planet_db
+  l2planet_db:
+    container_name: l2planet_db
+    image: "postgres:14-alpine"
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+    volumes:
+      - nps_data:/var/lib/postgresql/data
+
+volumes:
+  nps_data:
+    driver: local
