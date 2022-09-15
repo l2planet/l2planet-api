@@ -13,7 +13,7 @@ import (
 func main() {
 
 	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{})
-
+	db.GetClient().SyncDb()
 	ticker := time.NewTicker(15 * time.Minute)
 	done := make(chan bool)
 	go func() {
@@ -29,7 +29,7 @@ func main() {
 	}()
 	//db.GetClient().GetAllSolutionsWithTvl()
 
-	//db.GetClient().SyncDb()
+	//
 	/*start := time.Now()
 
 	elapsed := time.Since(start)
