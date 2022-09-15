@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	databaseUrl = "host=l2planet_db user=postgres password=123456789 dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	databaseUrl = "host=localhost user=postgres password=123456789 dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 	localDir    = "./config/"
 )
 
@@ -143,13 +143,13 @@ func (c *Client) SyncDb() error {
 		configDir = localDir
 	}
 
-	files, err := os.ReadDir(configDir + "solutions")
+	files, err := os.ReadDir(configDir + "solutions/")
 	if err != nil {
 		panic(err)
 	}
 
 	for _, file := range files {
-		dat, _ := os.ReadFile(configDir + "solutions" + file.Name())
+		dat, _ := os.ReadFile(configDir + "solutions/" + file.Name())
 		var chainConfig SolutionConfig
 		if err := yaml.Unmarshal(dat, &chainConfig); err != nil {
 			panic(err)
