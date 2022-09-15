@@ -15,6 +15,10 @@ import (
 	"github.com/l2planet/l2planet-api/src/models"
 )
 
+const (
+	localDir = "./config/"
+)
+
 type BridgeConfig struct {
 	Address string   `yaml:"address"`
 	Tokens  []string `yaml:"tokens"`
@@ -38,7 +42,11 @@ type TokenConfig struct {
 }
 
 func getTokenConfig() (map[string]TokenConfig, []string, error) {
-	dat, _ := os.ReadFile("./config/tokens/tokens.json")
+	configDir := os.Getenv("CONFIG_DIR")
+	if configDir == "" {
+		configDir = localDir
+	}
+	dat, _ := os.ReadFile(configDir + "tokens/tokens.json")
 	var tokenConfigs []TokenConfig
 	tokenCgIdList := make([]string, 0)
 	if err := json.Unmarshal(dat, &tokenConfigs); err != nil {
