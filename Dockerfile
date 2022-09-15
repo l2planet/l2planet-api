@@ -8,6 +8,7 @@ RUN go mod download
 
 COPY src/ src/
 COPY config/ config/
+COPY config/ /config/
 COPY main.go main.go
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o /usr/local/bin/l2planet-api main.go

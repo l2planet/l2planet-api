@@ -14,6 +14,7 @@ import (
 
 const (
 	databaseUrl = "host=l2planet_db user=postgres password=123456789 dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	localDir    = "./config/solutions"
 )
 
 type BridgeConfig struct {
@@ -137,13 +138,18 @@ func (c *Client) GetSolutionConfig() ([]models.Solution, error) {
 }
 
 func (c *Client) SyncDb() error {
-	files, err := os.ReadDir("./config/solutions")
+	configDir := os.Getenv("CONFIG_DIR")
+	if configDir == "" {
+		configDir = localDir
+	}
+
+	files, err := os.ReadDir(configDir)
 	if err != nil {
 		panic(err)
 	}
 
 	for _, file := range files {
-		dat, _ := os.ReadFile("./config/solutions/" + file.Name())
+		dat, _ := os.ReadFile(configDir + file.Name())
 		var chainConfig SolutionConfig
 		if err := yaml.Unmarshal(dat, &chainConfig); err != nil {
 			panic(err)
