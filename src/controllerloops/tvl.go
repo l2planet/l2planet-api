@@ -2,6 +2,7 @@ package controllerloops
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"math/big"
 	"os"
@@ -107,7 +108,7 @@ func CalculateTvl() error {
 
 					balance, err := getBalance(ethClient, bridge.ContractAdress, tokenConfig[tokenName].Address, tokenConfig[tokenName].Decimals)
 					if err != nil {
-						//fmt.Printf("balance of the %s token cannot be found: %v \n", tokenName, err)
+						fmt.Printf("balance of the %s token cannot be found: %v \n", tokenName, err)
 						continue
 					}
 
@@ -133,8 +134,9 @@ func CalculateTvl() error {
 				Value:     persistedTvl,
 				Timestamp: ts,
 				BridgeID:  bridgeModel.ID,
-			}); err != nil {
+			}).Error; err != nil {
 				tx.Rollback()
+				return err
 			}
 		}
 	}

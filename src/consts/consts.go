@@ -1,5 +1,5 @@
 package consts
 
 const (
-	EthClientUrl = "http://localhost:30303"
+	EthClientUrl = "https://eth-mainnet.g.alchemy.com/v2/dVblG1Tfi-psOdZvwsZy_T4mxBHaA-e_"
 )

@@ -17,6 +17,8 @@ func main() {
 	db.GetClient().SyncDb()
 	ticker := time.NewTicker(15 * time.Minute)
 	done := make(chan bool)
+	err := controllerloops.CalculateTvl()
+	fmt.Println("error while calculating tvls", err)
 	go func() {
 		for {
 			select {
