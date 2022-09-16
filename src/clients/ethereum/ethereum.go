@@ -3,11 +3,13 @@ package ethereum
 import (
 	"context"
 	"math/big"
+	"os"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 
+	"github.com/l2planet/l2planet-api/src/consts"
 	"github.com/l2planet/l2planet-api/src/token"
 )
 
@@ -15,8 +17,12 @@ type Client struct {
 	*ethclient.Client
 }
 
-func NewClient(url string) *Client {
-	client, _ := ethclient.Dial(url)
+func NewClient() *Client {
+	ethUrl := os.Getenv("ETH_URL")
+	if ethUrl == "" {
+		ethUrl = consts.EthClientUrl
+	}
+	client, _ := ethclient.Dial(ethUrl)
 
 	return &Client{
 		Client: client,

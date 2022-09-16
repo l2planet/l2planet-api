@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -23,17 +24,11 @@ func main() {
 				ticker.Stop()
 				return
 			case <-ticker.C:
-				controllerloops.CalculateTvl()
+				err := controllerloops.CalculateTvl()
+				fmt.Println("error while calculating tvls", err)
 			}
 		}
 	}()
-	//db.GetClient().GetAllSolutionsWithTvl()
-
-	//
-	/*start := time.Now()
-
-	elapsed := time.Since(start)
-	fmt.Printf("calculate tvl took %s", elapsed)*/
 
 	r := gin.Default()
 

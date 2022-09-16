@@ -2,7 +2,6 @@ package controllerloops
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 	"math/big"
 	"os"
@@ -11,7 +10,6 @@ import (
 	"github.com/l2planet/l2planet-api/src/clients/coingecko"
 	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/clients/ethereum"
-	"github.com/l2planet/l2planet-api/src/consts"
 	"github.com/l2planet/l2planet-api/src/models"
 )
 
@@ -63,15 +61,15 @@ func getTokenConfig() (map[string]TokenConfig, []string, error) {
 }
 
 // TODO: instead of querying blockchain one by one, use multicall
-func CalculateTvl() {
+func CalculateTvl() error {
 	ts := time.Now()
 	solutionConfigs, _ := db.GetClient().GetSolutionConfig()
 	tokenConfig, cgSymbolList, _ := getTokenConfig()
-	ethClient := ethereum.NewClient(consts.EthClientUrl)
+	ethClient := ethereum.NewClient()
 	coinGeckoClient := coingecko.NewClient()
 
 	prices, _ := coinGeckoClient.GetPrices(cgSymbolList)
-
+	tx := db.GetClient().DB.Begin()
 	for _, solution := range solutionConfigs {
 		for _, bridge := range solution.Bridges {
 			tvl := big.NewFloat(0.00)
@@ -84,7 +82,7 @@ func CalculateTvl() {
 
 					balance, err := getBalance(ethClient, bridge.ContractAdress, tokenConfig[name].Address, tokenConfig[name].Decimals)
 					if err != nil {
-						fmt.Printf("balance of the %s token cannot be found: %v \n", name, err)
+						//fmt.Printf("balance of the %s token cannot be found: %v \n", name, err)
 						continue
 					}
 
@@ -109,7 +107,7 @@ func CalculateTvl() {
 
 					balance, err := getBalance(ethClient, bridge.ContractAdress, tokenConfig[tokenName].Address, tokenConfig[tokenName].Decimals)
 					if err != nil {
-						fmt.Printf("balance of the %s token cannot be found: %v \n", tokenName, err)
+						//fmt.Printf("balance of the %s token cannot be found: %v \n", tokenName, err)
 						continue
 					}
 
@@ -131,13 +129,17 @@ func CalculateTvl() {
 				}
 			}
 			persistedTvl, _ := tvl.Float64()
-			db.GetClient().Create(&models.Tvl{
+			if err := tx.Create(&models.Tvl{
 				Value:     persistedTvl,
 				Timestamp: ts,
 				BridgeID:  bridgeModel.ID,
-			})
+			}); err != nil {
+				tx.Rollback()
+			}
 		}
 	}
+
+	return tx.Commit().Error
 }
 
 func getBalance(ethClient *ethereum.Client, bridgeAddress, tokenAddress string, decimals int) (*big.Float, error) {
