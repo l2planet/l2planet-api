@@ -1,20 +1,16 @@
 package main
 
 import (
-	"fmt"
-	"time"
-
-	"github.com/gin-gonic/gin"
 	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/controllerloops"
-	"github.com/l2planet/l2planet-api/src/controllers"
 	"github.com/l2planet/l2planet-api/src/models"
 )
 
 func main() {
 
 	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{})
-	db.GetClient().SyncDb()
+	controllerloops.CalculateTvlMulticall()
+	/*db.GetClient().SyncDb()
 	ticker := time.NewTicker(15 * time.Minute)
 	done := make(chan bool)
 	err := controllerloops.CalculateTvl()
@@ -41,5 +37,6 @@ func main() {
 	r.POST("/newsletter", controllers.NewNewsletter)
 
 	r.Run(":8080")
+	*/
 
 }

@@ -9,10 +9,10 @@ import (
 
 type Chain struct {
 	gorm.Model
-	Icon        string `json:"icon"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	EvmID       int
+	Icon        string         `json:"icon" gorm:"not null"`
+	Name        string         `json:"name" gorm:"not null"`
+	Description string         `json:"description" gorm:"not null"`
+	EvmID       int            `gorm:"not null"`
 	Solutions   pq.StringArray `json:"solutions" gorm:"type:text[]"`
 }
 
@@ -31,13 +31,14 @@ type Solution struct {
 	Tokens      pq.StringArray `gorm:"type:text[]"`
 	Bridges     []Bridge
 	Projects    pq.StringArray `gorm:"type:text[]"`
-	EvmID       int
+	EvmID       int            `gorm:"not null"`
 	//ChainID     uint
 }
 
 func (Solution) TableName() string { return "solution" }
 
 type Project struct {
+	gorm.Model
 	Icon        string         `json:"icon"`
 	Name        string         `json:"name"`
 	Description string         `json:"description"`
@@ -46,7 +47,7 @@ type Project struct {
 	Github      string         `json:"github"`
 	Video       string         `json:"video"`
 	Investors   pq.StringArray `json:"investors" gorm:"type:text[]"`
-	SolutionID  uint
+	SolutionID  uint           `gorm:"not null"`
 }
 
 func (Project) TableName() string { return "projects" }

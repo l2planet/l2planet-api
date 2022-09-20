@@ -30,6 +30,7 @@ type SolutionConfig struct {
 }
 
 type SolutionWithTvl struct {
+	ID          uint
 	Name        string
 	Icon        string
 	Website     string

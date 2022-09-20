@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/StackExchange/wmi v1.2.1 // indirect
+	github.com/alethio/web3-multicall-go v0.0.15 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect

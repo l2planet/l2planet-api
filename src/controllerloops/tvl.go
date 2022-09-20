@@ -6,12 +6,17 @@ import (
 	"math"
 	"math/big"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/l2planet/l2planet-api/src/clients/coingecko"
 	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/clients/ethereum"
 	"github.com/l2planet/l2planet-api/src/models"
+	"github.com/l2planet/l2planet-api/src/multicall"
+	"github.com/l2planet/l2planet-api/src/token"
 )
 
 const (
@@ -59,6 +64,63 @@ func getTokenConfig() (map[string]TokenConfig, []string, error) {
 	}
 
 	return tokenConfigMap, tokenCgIdList, nil
+}
+
+func CalculateTvlMulticall() error {
+	//ts := time.Now()
+	solutionConfigs, _ := db.GetClient().GetSolutionConfig()
+	tokenConfig, cgSymbolList, _ := getTokenConfig()
+	ethClient := ethereum.NewClient()
+	coinGeckoClient := coingecko.NewClient()
+	tokenAbi, _ := abi.JSON(strings.NewReader(token.TokenABI))
+	multiCalls := make([]multicall.Multicall2Call, 0)
+	prices, _ := coinGeckoClient.GetPrices(cgSymbolList)
+	for _, solution := range solutionConfigs {
+		for _, bridge := range solution.Bridges {
+			tvl := big.NewFloat(0.00)
+			var bridgeModel models.Bridge
+			db.GetClient().First(&bridgeModel, "contract_adress = ?", bridge.ContractAdress)
+			//if No tokens specified, go over all of them, else iterate over the specified list
+			if len(bridge.SupportedTokens) == 0 {
+				for name := range tokenConfig {
+					bridgeAddr := common.HexToAddress(bridge.ContractAdress)
+					packedData, err := tokenAbi.Pack("balanceOf", bridgeAddr)
+					if err != nil {
+						continue
+					}
+					if tokenConfig[name].Address == "" {
+						continue
+					}
+					tokenAddr := common.HexToAddress(tokenConfig[name].Address)
+					multiCalls = append(multiCalls, multicall.Multicall2Call{
+						Target:   tokenAddr,
+						CallData: packedData,
+					})
+
+				}
+				ethClient.MulticallBalance(multiCalls)
+			} else {
+				for _, tokenName := range bridge.SupportedTokens {
+
+					balance, err := getBalance(ethClient, bridge.ContractAdress, tokenConfig[tokenName].Address, tokenConfig[tokenName].Decimals)
+					if err != nil {
+						fmt.Printf("balance of the %s token cannot be found: %v \n", tokenName, err)
+						continue
+					}
+
+					coingeckoId := tokenConfig[tokenName].CoingeckoId
+					price := (*prices)[coingeckoId]["usd"]
+					bigPrice := big.NewFloat(float64(price))
+
+					value := bigPrice.Mul(bigPrice, balance)
+					tvl = tvl.Add(tvl, value)
+				}
+			}
+			persistedTvl, _ := tvl.Float64()
+			fmt.Println(persistedTvl)
+		}
+	}
+	return nil
 }
 
 // TODO: instead of querying blockchain one by one, use multicall
