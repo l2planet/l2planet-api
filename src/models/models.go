@@ -32,7 +32,7 @@ type Solution struct {
 	TokenPrices pq.StringArray `gorm:"type:text[]"`
 	Bridges     []Bridge
 	Projects    pq.StringArray `gorm:"type:text[]"`
-	EvmID       int            `gorm:"not null"`
+	EvmID       int
 }
 
 func (Solution) TableName() string { return "solution" }
