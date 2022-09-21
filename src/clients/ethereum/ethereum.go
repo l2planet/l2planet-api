@@ -82,13 +82,14 @@ func (client *Client) MulticallBalance(multicalls []multicall.Multicall2Call) {
 	fmt.Println(string(jso))
 	fmt.Println(hex.EncodeToString(resp))
 	unpackedResp, _ := client.Abi.Unpack("aggregate", resp)
-	a, err := json.Marshal(unpackedResp[0])
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(a)
-
-	err = json.Unmarshal(a, &responses)
+	/*
+		a, err := json.Marshal(unpackedResp[1])
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(a)
+	*/
+	err = json.Unmarshal([]byte(unpackedResp), &responses)
 	if err != nil {
 		panic(err)
 	}

@@ -29,10 +29,10 @@ type Solution struct {
 	Investors   pq.StringArray `gorm:"type:text[]"`
 	Description string
 	Tokens      pq.StringArray `gorm:"type:text[]"`
+	TokenPrices pq.StringArray `gorm:"type:text[]"`
 	Bridges     []Bridge
 	Projects    pq.StringArray `gorm:"type:text[]"`
 	EvmID       int            `gorm:"not null"`
-	//ChainID     uint
 }
 
 func (Solution) TableName() string { return "solution" }

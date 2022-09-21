@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	databaseUrl = "host=localhost user=postgres password=123456789 dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai"
+	databaseUrl = "host=l2planet_db user=postgres password=123456789 dbname=postgres port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 	localDir    = "./config/"
 )
 
@@ -40,6 +40,7 @@ type SolutionWithTvl struct {
 	Investors   pq.StringArray `gorm:"type:text[]"`
 	Description string
 	Tokens      pq.StringArray `gorm:"type:text[]"`
+	TokenPrices pq.StringArray `gorm:"type:text[]"`
 	Projects    pq.StringArray `gorm:"type:text[]"`
 	SolutionID  string
 	TvlValue    float64
