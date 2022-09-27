@@ -89,6 +89,36 @@ func Info(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
+
+	daily, err := db.GetClient().GetAllTvlsWithLength("hour", 24)
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+	dailyMap := make(map[string][]string)
+	for _, v := range daily {
+		dailyMap[v.Name] = v.Historical
+	}
+
+	yearly, err := db.GetClient().GetAllTvlsWithLength("day", 365)
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+	yearlyMap := make(map[string][]string)
+	for _, v := range yearly {
+		yearlyMap[v.Name] = v.Historical
+	}
+
+	for _, sol := range solutionsWithTvl {
+		sol.Tvls = db.HistoricalTvl{
+			Daily:  dailyMap[sol.Name],
+			Yearly: yearlyMap[sol.Name],
+		}
+	}
+
 	solutionsMap := make(map[string]db.SolutionWithTvl)
 	for _, solution := range solutionsWithTvl {
 		solutionsMap[solution.Name] = solution
@@ -112,43 +142,7 @@ func Info(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
-	/*
-		chainsByte, err := json.Marshal(chains)
-		if err != nil {
 
-			c.JSON(http.StatusInternalServerError, nil)
-			return
-		}
-
-		solutionsWithTvlbyte, err := json.Marshal(solutionsWithTvl)
-		if err != nil {
-
-			c.JSON(http.StatusInternalServerError, nil)
-			return
-		}
-
-		projectByte, err := json.Marshal(projects)
-		if err != nil {
-
-			c.JSON(http.StatusInternalServerError, nil)
-			return
-		}
-
-		newsletterByte, err := json.Marshal(newsletter)
-		if err != nil {
-
-			c.JSON(http.StatusInternalServerError, nil)
-			return
-		}
-
-		c.JSON(
-			http.StatusOK, gin.H{
-				"chains":            string(chainsByte),
-				"solutions":         string(solutionsWithTvlbyte),
-				"projects":          string(projectByte),
-				"latest_newsletter": string(newsletterByte),
-			})
-	*/
 	c.JSON(
 		http.StatusOK, gin.H{
 			"chains":            chainsMap,

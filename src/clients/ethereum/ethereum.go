@@ -2,14 +2,10 @@ package ethereum
 
 import (
 	"context"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
 	"math/big"
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -57,45 +53,46 @@ func NewClient() *Client {
 	}
 }
 
-func (client *Client) MulticallBalance(multicalls []multicall.Multicall2Call) {
-	var responses []CallResponse
-	instance, err := multicall.NewMulticall(client.MulticallAddress, client)
-	if err != nil {
-		panic(err)
-	}
-	callData, err := client.Abi.Pack("aggregate", multicalls)
-	if err != nil {
-		panic(err)
-	}
-
-	// Perform multicall
-	resp, err := client.Client.CallContract(context.Background(), ethereum.CallMsg{To: &client.MulticallAddress, Data: callData}, nil)
-	if err != nil {
-		panic(err)
-	}
-	resp2, err := instance.Aggregate(randomSigner(), multicalls)
-	if err != nil {
-		panic(err)
-	}
-
-	jso, _ := resp2.MarshalJSON()
-	fmt.Println(string(jso))
-	fmt.Println(hex.EncodeToString(resp))
-	unpackedResp, _ := client.Abi.Unpack("aggregate", resp)
-	/*
-		a, err := json.Marshal(unpackedResp[1])
+/*
+	func (client *Client) MulticallBalance(multicalls []multicall.Multicall2Call) {
+		var responses []CallResponse
+		instance, err := multicall.NewMulticall(client.MulticallAddress, client)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(a)
-	*/
-	err = json.Unmarshal([]byte(unpackedResp), &responses)
-	if err != nil {
-		panic(err)
-	}
+		callData, err := client.Abi.Pack("aggregate", multicalls)
+		if err != nil {
+			panic(err)
+		}
+
+		// Perform multicall
+		resp, err := client.Client.CallContract(context.Background(), ethereum.CallMsg{To: &client.MulticallAddress, Data: callData}, nil)
+		if err != nil {
+			panic(err)
+		}
+		resp2, err := instance.Aggregate(randomSigner(), multicalls)
+		if err != nil {
+			panic(err)
+		}
+
+		jso, _ := resp2.MarshalJSON()
+		fmt.Println(string(jso))
+		fmt.Println(hex.EncodeToString(resp))
+		unpackedResp, _ := client.Abi.Unpack("aggregate", resp)
+
+			a, err := json.Marshal(unpackedResp[1])
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(a)
+
+		err = json.Unmarshal([]byte(unpackedResp), &responses)
+		if err != nil {
+			panic(err)
+		}
 
 }
-
+*/
 func (client *Client) BalanceAt(address string) (*big.Int, error) {
 	account := common.HexToAddress(address)
 	balance, err := client.Client.BalanceAt(context.Background(), account, nil)

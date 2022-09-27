@@ -6,17 +6,12 @@ import (
 	"math"
 	"math/big"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/l2planet/l2planet-api/src/clients/coingecko"
 	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/clients/ethereum"
 	"github.com/l2planet/l2planet-api/src/models"
-	"github.com/l2planet/l2planet-api/src/multicall"
-	"github.com/l2planet/l2planet-api/src/token"
 )
 
 const (
@@ -66,6 +61,7 @@ func getTokenConfig() (map[string]TokenConfig, []string, error) {
 	return tokenConfigMap, tokenCgIdList, nil
 }
 
+/*
 func CalculateTvlMulticall() error {
 	//ts := time.Now()
 	solutionConfigs, _ := db.GetClient().GetSolutionConfig()
@@ -122,6 +118,7 @@ func CalculateTvlMulticall() error {
 	}
 	return nil
 }
+*/
 
 // TODO: instead of querying blockchain one by one, use multicall
 func CalculateTvl() error {
@@ -165,13 +162,6 @@ func CalculateTvl() error {
 					//calculate total value
 					value := bigPrice.Mul(bigPrice, balance)
 					tvl = tvl.Add(tvl, value)
-					/*persistedBalance, _ := balance.Float64()
-					db.GetClient().Create(&models.Balance{
-						Symbol:    name,
-						Value:     persistedBalance,
-						Timestamp: ts,
-						BridgeID:  bridgeModel.ID,
-					})*/
 				}
 			} else {
 				for _, tokenName := range bridge.SupportedTokens {
@@ -188,15 +178,6 @@ func CalculateTvl() error {
 
 					value := bigPrice.Mul(bigPrice, balance)
 					tvl = tvl.Add(tvl, value)
-					/*
-						persistedBalance, _ := balance.Float64()
-						db.GetClient().Create(&models.Balance{
-							Symbol:    tokenName,
-							Value:     persistedBalance,
-							Timestamp: ts,
-							BridgeID:  bridgeModel.ID,
-						})
-					*/
 				}
 			}
 			persistedTvl, _ := tvl.Float64()

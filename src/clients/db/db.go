@@ -29,6 +29,11 @@ type SolutionConfig struct {
 	Description string         `yaml:"description"`
 }
 
+type HistoricalTvl struct {
+	Daily  []string
+	Yearly []string
+}
+
 type SolutionWithTvl struct {
 	ID          uint
 	Name        string
@@ -43,7 +48,13 @@ type SolutionWithTvl struct {
 	TokenPrices pq.StringArray `gorm:"type:text[]"`
 	Projects    pq.StringArray `gorm:"type:text[]"`
 	SolutionID  string
-	TvlValue    float64
+	TvlValue    float64       `json:"tvl"`
+	Tvls        HistoricalTvl `json:"tvls"`
+}
+
+type HistoricalTvlModel struct {
+	Name       string
+	Historical pq.StringArray `gorm:"type:text[]"`
 }
 
 var client *Client
@@ -120,10 +131,17 @@ func (c *Client) GetLatestNewsletter() (models.Newsletter, error) {
 	return newsletter, nil
 }
 
+func (c *Client) GetAllTvlsWithLength(truncateBy string, count int) ([]HistoricalTvlModel, error) {
+	var historical []HistoricalTvlModel
+	if err := c.Raw("SELECT  sbtwithrow.name,array_agg('{ \"t\": ' || sbtwithrow.timestamp || ', \"v\": ' || sbtwithrow.tvl_value || '}') as historical FROM (SELECT ROW_NUMBER() OVER (PARTITION BY sbt.solution_id ORDER BY sbt.name) AS r,sbt.id,sbt.name,sbt.tvl_value,sbt.timestamp FROM (SELECT DISTINCT ON (date_trunc(?, bridgetvl.timestamp), solution.id) * FROM solution INNER JOIN (SELECT bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id ORDER BY solution.id, date_trunc(?, bridgetvl.timestamp), bridgetvl.timestamp  DESC) as sbt) as sbtwithrow WHERE sbtwithrow.r <= ? GROUP BY sbtwithrow.name", truncateBy, truncateBy, count).Scan(&historical).Error; err != nil {
+		return nil, err
+	}
+	return historical, nil
+}
+
 func (c *Client) GetAllSolutionsWithTvl() ([]SolutionWithTvl, error) {
 	var solutionWithTvls []SolutionWithTvl
-	err := c.Raw("SELECT * FROM solution INNER JOIN (SELECT DISTINCT ON(bridges.solution_id) bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id").Scan(&solutionWithTvls).Error
-	if err != nil {
+	if err := c.Raw("SELECT * FROM solution INNER JOIN (SELECT DISTINCT ON(bridges.solution_id) bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id").Scan(&solutionWithTvls).Error; err != nil {
 		return nil, err
 	}
 

@@ -9,10 +9,10 @@ import (
 
 type Chain struct {
 	gorm.Model
-	Icon        string         `json:"icon" gorm:"not null"`
-	Name        string         `json:"name" gorm:"not null"`
-	Description string         `json:"description" gorm:"not null"`
-	EvmID       int            `gorm:"not null"`
+	Icon        string `json:"icon" gorm:"not null"`
+	Name        string `json:"name" gorm:"not null"`
+	Description string `json:"description" gorm:"not null"`
+	EvmID       int
 	Solutions   pq.StringArray `json:"solutions" gorm:"type:text[]"`
 }
 
