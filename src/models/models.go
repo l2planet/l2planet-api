@@ -9,10 +9,10 @@ import (
 
 type Chain struct {
 	gorm.Model
-	Icon        string `json:"icon" gorm:"not null"`
-	Name        string `json:"name" gorm:"not null"`
-	Description string `json:"description" gorm:"not null"`
-	EvmID       int
+	Icon        string         `json:"icon" gorm:"not null"`
+	Name        string         `json:"name" gorm:"not null"`
+	Description string         `json:"description" gorm:"not null"`
+	EvmID       int            `jspn:"evm_id"`
 	Solutions   pq.StringArray `json:"solutions" gorm:"type:text[]"`
 }
 
@@ -20,19 +20,19 @@ func (Chain) TableName() string { return "chains" }
 
 type Solution struct {
 	gorm.Model
-	Name        string `gorm:"unique;not null"`
-	Icon        string
-	Website     string
-	Twitter     string
-	Github      string
-	Video       string
-	Investors   pq.StringArray `gorm:"type:text[]"`
-	Description string
-	Tokens      pq.StringArray `gorm:"type:text[]"`
-	TokenPrices pq.StringArray `gorm:"type:text[]"`
+	Name        string         `gorm:"unique;not null" json:"name"`
+	Icon        string         `json:"icon"`
+	Website     string         `json:"website"`
+	Twitter     string         `json:"twitter"`
+	Github      string         `json:"github"`
+	Video       string         `json:"video"`
+	Investors   pq.StringArray `gorm:"type:text[]" json:"investors"`
+	Description string         `json:"description"`
+	Tokens      pq.StringArray `gorm:"type:text[]" json:"tokens"`
+	TokenPrices pq.StringArray `gorm:"type:text[]" json:"token_prices"`
 	Bridges     []Bridge
-	Projects    pq.StringArray `gorm:"type:text[]"`
-	EvmID       int
+	Projects    pq.StringArray `gorm:"type:text[]" json:"projects"`
+	EvmID       int            `json:"evm_id"`
 }
 
 func (Solution) TableName() string { return "solution" }
@@ -105,9 +105,9 @@ func (Tvl) TableName() string { return "tvls" }
 
 type Newsletter struct {
 	gorm.Model
-	UserName string
-	Text     string
-	UsersID  uint
+	UserName string `json:"username"`
+	Text     string `json:"text"`
+	UsersID  uint   `json:"user_id"`
 }
 
 func (Newsletter) TableName() string { return "newsletters" }
@@ -115,8 +115,8 @@ func (Newsletter) TableName() string { return "newsletters" }
 type Users struct {
 	gorm.Model
 	Newsletters []Newsletter
-	Username    string
-	Password    string
+	Username    string `json:"username"`
+	Password    string `json:"password"`
 }
 
 func (Users) TableName() string { return "users" }

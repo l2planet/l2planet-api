@@ -47,9 +47,9 @@ type SolutionWithTvl struct {
 	Tokens      pq.StringArray `gorm:"type:text[]"`
 	TokenPrices pq.StringArray `gorm:"type:text[]" json:"token_prices"`
 	Projects    pq.StringArray `gorm:"type:text[]" json:"projects"`
-	SolutionID  string
-	TvlValue    float64       `json:"tvl"`
-	Tvls        HistoricalTvl `json:"tvls"`
+	SolutionID  string         `json:"solution_id"`
+	TvlValue    float64        `json:"tvl"`
+	Tvls        HistoricalTvl  `json:"tvls"`
 }
 
 type HistoricalTvlModel struct {
