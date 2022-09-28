@@ -35,18 +35,18 @@ type HistoricalTvl struct {
 }
 
 type SolutionWithTvl struct {
-	ID          uint
-	Name        string
-	Icon        string
-	Website     string
-	Twitter     string
-	Github      string
-	Video       string
-	Investors   pq.StringArray `gorm:"type:text[]"`
-	Description string
+	ID          uint           `json:"id"`
+	Name        string         `json:"name"`
+	Icon        string         `json:"icon"`
+	Website     string         `json:"website"`
+	Twitter     string         `json:"twitter"`
+	Github      string         `json:"github"`
+	Video       string         `json:"video"`
+	Investors   pq.StringArray `gorm:"type:text[]" json:"investors"`
+	Description string         `json:"description"`
 	Tokens      pq.StringArray `gorm:"type:text[]"`
-	TokenPrices pq.StringArray `gorm:"type:text[]"`
-	Projects    pq.StringArray `gorm:"type:text[]"`
+	TokenPrices pq.StringArray `gorm:"type:text[]" json:"token_prices"`
+	Projects    pq.StringArray `gorm:"type:text[]" json:"projects"`
 	SolutionID  string
 	TvlValue    float64       `json:"tvl"`
 	Tvls        HistoricalTvl `json:"tvls"`
@@ -193,4 +193,13 @@ func (c *Client) SyncDb() error {
 		}
 	}
 	return nil
+}
+
+func (c *Client) GetUser(userName string) (*models.Users, error) {
+	var user models.Users
+
+	if err := c.Raw("SELECT * FROM users WHERE username = ?", userName).Scan(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

@@ -105,8 +105,18 @@ func (Tvl) TableName() string { return "tvls" }
 
 type Newsletter struct {
 	gorm.Model
-	UserName  string
-	PublicKey string
+	UserName string
+	Text     string
+	UsersID  uint
 }
 
 func (Newsletter) TableName() string { return "newsletters" }
+
+type Users struct {
+	gorm.Model
+	Newsletters []Newsletter
+	Username    string
+	Password    string
+}
+
+func (Users) TableName() string { return "users" }

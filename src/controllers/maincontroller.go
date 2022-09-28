@@ -5,10 +5,34 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/models"
 )
+
+func Register(c *gin.Context) {
+	var user models.Users
+	if err := c.BindJSON(&user); err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, nil)
+		return
+	}
+
+	pass, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+	user.Password = string(pass)
+	if err := db.GetClient().Create(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
 
 func NewNewsletter(c *gin.Context) {
 	var newsletter models.Newsletter
@@ -112,8 +136,9 @@ func Info(c *gin.Context) {
 		yearlyMap[v.Name] = v.Historical
 	}
 
-	for _, sol := range solutionsWithTvl {
-		sol.Tvls = db.HistoricalTvl{
+	for i, sol := range solutionsWithTvl {
+
+		solutionsWithTvl[i].Tvls = db.HistoricalTvl{
 			Daily:  dailyMap[sol.Name],
 			Yearly: yearlyMap[sol.Name],
 		}

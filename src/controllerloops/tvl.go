@@ -137,7 +137,13 @@ func CalculateTvl() error {
 				coingeckoId := tokenConfig[token].CoingeckoId
 				tokenPrices = append(tokenPrices, fmt.Sprintf("%f", (*prices)[coingeckoId]["usd"]))
 			}
-			db.GetClient().Model(&models.Solution{}).Where("id = ?", solution.ID).Update("token_prices", tokenPrices)
+
+			var solutionModel models.Solution
+
+			db.GetClient().Raw("SELECT * FROM solution WHERE name = ?", solution.Name).Scan(&solutionModel)
+			solutionModel.TokenPrices = tokenPrices
+			db.GetClient().Save(&solutionModel)
+
 		}
 		for _, bridge := range solution.Bridges {
 			tvl := big.NewFloat(0.00)
