@@ -1,13 +1,17 @@
 package controllers
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/l2planet/l2planet-api/src/clients/db"
+	"github.com/l2planet/l2planet-api/src/clients/redis"
 	"github.com/l2planet/l2planet-api/src/models"
 )
 
@@ -96,9 +100,14 @@ func NewProject(c *gin.Context) {
 }
 
 func Info(c *gin.Context) {
+	cacheRes, err := redis.GetClient().Get(context.TODO(), "info").Result()
+	if err == nil {
+		c.Data(http.StatusOK, "application/json", []byte(cacheRes))
+		return
+	}
+
 	chains, err := db.GetClient().GetAllChains()
 	if err != nil {
-
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
@@ -168,11 +177,22 @@ func Info(c *gin.Context) {
 		return
 	}
 
-	c.JSON(
-		http.StatusOK, gin.H{
-			"chains":            chainsMap,
-			"solutions":         solutionsMap,
-			"projects":          projectsMap,
-			"latest_newsletter": newsletter,
-		})
+	responseMap := make(map[string]interface{}, 0)
+	responseMap["chains"] = chainsMap
+	responseMap["solutions"] = solutionsMap
+	responseMap["projects"] = projectsMap
+	responseMap["latest_newsletter"] = newsletter
+
+	responseBody, err := json.Marshal(responseMap)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	redis.GetClient().Set(context.TODO(), "info", string(responseBody), 5*time.Minute).Result()
+
+	//c.PureJSON(http.StatusOK, string(responseBody))
+	c.Data(http.StatusOK, "application/json", responseBody)
+	//c.PureJSON()
+	//c.String(http.StatusOK, "%s", string(responseBody))
 }

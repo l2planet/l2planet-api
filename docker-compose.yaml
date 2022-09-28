@@ -11,6 +11,7 @@ services:
       - "80:8080"
     depends_on:
       - l2planet_db
+      - redis
   l2planet_db:
     container_name: l2planet_db
     image: "postgres:14-alpine"
@@ -20,6 +21,11 @@ services:
       - POSTGRES_PASSWORD=123456789
     volumes:
       - nps_data:/var/lib/postgresql/data
+  redis:
+    container_name: redis
+    image: redis:7.0.5
+    ports:
+      - "127.0.0.1:6379:6379"
 
 volumes:
   nps_data:
