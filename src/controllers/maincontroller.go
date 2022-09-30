@@ -113,7 +113,7 @@ func Info(c *gin.Context) {
 	}
 	chainsMap := make(map[string]models.Chain)
 	for _, chain := range chains {
-		chainsMap[chain.Name] = chain
+		chainsMap[chain.StringID] = chain
 	}
 
 	solutionsWithTvl, err := db.GetClient().GetAllSolutionsWithTvl()
@@ -167,7 +167,7 @@ func Info(c *gin.Context) {
 
 	projectsMap := make(map[string]models.Project)
 	for _, project := range projects {
-		projectsMap[project.Name] = project
+		projectsMap[project.StringID] = project
 	}
 
 	newsletter, err := db.GetClient().GetLatestNewsletter()

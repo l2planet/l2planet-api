@@ -9,6 +9,7 @@ import (
 
 type Chain struct {
 	gorm.Model
+	StringID    string         `json:"string_id"`
 	Icon        string         `json:"icon" gorm:"not null"`
 	Name        string         `json:"name" gorm:"not null"`
 	Description string         `json:"description" gorm:"not null"`
@@ -42,6 +43,7 @@ func (Solution) TableName() string { return "solution" }
 
 type Project struct {
 	gorm.Model
+	StringID    string         `json:"string_id"`
 	Icon        string         `json:"icon"`
 	Name        string         `json:"name"`
 	Description string         `json:"description"`
