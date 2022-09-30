@@ -21,6 +21,7 @@ func (Chain) TableName() string { return "chains" }
 
 type Solution struct {
 	gorm.Model
+	ChainID     string         `json:"chain_id"`
 	StringID    string         `json:"string_id"`
 	Categories  pq.StringArray `gorm:"type:text[]" json:"categories"`
 	Name        string         `gorm:"unique;not null" json:"name"`

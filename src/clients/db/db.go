@@ -36,6 +36,7 @@ type HistoricalTvl struct {
 
 type SolutionWithTvl struct {
 	Categories  pq.StringArray `gorm:"type:text[]" json:"categories"`
+	ChainID     string         `json:"chain_id"`
 	StringID    string         `json:"string_id"`
 	ID          uint           `json:"id"`
 	Name        string         `json:"name"`

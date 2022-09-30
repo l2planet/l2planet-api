@@ -80,6 +80,10 @@ func NewSolution(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
+	var chain models.Chain
+	db.GetClient().Raw("SELECT * FROM chain WHERE chain_id = ?", solution.ChainID).Scan(&chain)
+	chain.Solutions = append(chain.Solutions, solution.StringID)
+	db.GetClient().Save(&chain)
 
 	c.JSON(http.StatusOK, nil)
 }
