@@ -14,7 +14,7 @@ type Chain struct {
 	Name        string         `json:"name" gorm:"not null"`
 	Description string         `json:"description" gorm:"not null"`
 	EvmID       int            `jspn:"evm_id"`
-	Solutions   pq.StringArray `json:"solutions" gorm:"type:text[]"`
+	Solutions   pq.StringArray `json:"layer2s" gorm:"type:text[]"`
 }
 
 func (Chain) TableName() string { return "chains" }
