@@ -82,8 +82,8 @@ type Bridge struct {
 	gorm.Model
 	Native          bool //`gorm:"not null"`
 	SolutionID      uint
-	ContractAdress  string         `gorm:"unique;not null"`
-	SupportedTokens pq.StringArray `gorm:"type:text[]"`
+	ContractAdress  string         `gorm:"unique;not null" json:"contract_address"`
+	SupportedTokens pq.StringArray `gorm:"type:text[]" json:"tokens"`
 	Balances        []Balance
 	Tvls            []Tvl
 }
