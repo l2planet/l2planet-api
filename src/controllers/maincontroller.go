@@ -81,7 +81,7 @@ func NewSolution(c *gin.Context) {
 		return
 	}
 	var chain models.Chain
-	db.GetClient().Raw("SELECT * FROM chain WHERE chain_id = ?", solution.ChainID).Scan(&chain)
+	db.GetClient().Raw("SELECT * FROM chains WHERE chain_id = ?", solution.ChainID).Scan(&chain)
 	chain.Solutions = append(chain.Solutions, solution.StringID)
 	db.GetClient().Save(&chain)
 
