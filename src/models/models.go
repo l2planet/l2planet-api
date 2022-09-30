@@ -52,7 +52,7 @@ type Project struct {
 	Twitter     string         `json:"twitter"`
 	Github      string         `json:"github"`
 	Video       string         `json:"video"`
-	Investors   pq.StringArray `json:"investors" gorm:"type:text[]"`
+	Categories  pq.StringArray `json:"categories" gorm:"type:text[]"`
 	SolutionID  uint           `gorm:"not null"`
 	Layer2IDs   pq.StringArray `json:"l2_ids" gorm:"type:text[]"`
 }
