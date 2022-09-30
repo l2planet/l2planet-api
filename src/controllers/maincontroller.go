@@ -155,7 +155,7 @@ func Info(c *gin.Context) {
 
 	solutionsMap := make(map[string]db.SolutionWithTvl)
 	for _, solution := range solutionsWithTvl {
-		solutionsMap[solution.Name] = solution
+		solutionsMap[solution.StringID] = solution
 	}
 
 	projects, err := db.GetClient().GetAllProjects()
