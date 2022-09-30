@@ -54,6 +54,7 @@ type Project struct {
 	Video       string         `json:"video"`
 	Investors   pq.StringArray `json:"investors" gorm:"type:text[]"`
 	SolutionID  uint           `gorm:"not null"`
+	Layer2IDs   pq.StringArray `json:"l2_ids" gorm:"type:text[]"`
 }
 
 func (Project) TableName() string { return "projects" }
