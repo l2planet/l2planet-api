@@ -74,6 +74,7 @@ func NewSolution(c *gin.Context) {
 	var solution models.Solution
 	if err := c.BindJSON(&solution); err != nil {
 		c.JSON(http.StatusBadRequest, nil)
+		return
 	}
 
 	if err := db.GetClient().Create(&solution).Error; err != nil {
