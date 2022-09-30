@@ -133,12 +133,12 @@ func CalculateTvl() error {
 	for _, solution := range solutionConfigs {
 		if solution.Token != "" {
 			coingeckoId := tokenConfig[solution.Token].CoingeckoId
-			tokenPrice := fmt.Sprintf("%f", (*prices)[coingeckoId]["usd"])
-
+			//tokenPrice := fmt.Sprintf("%f", (*prices)[coingeckoId]["usd"])
+			tokenPrice := float64((*prices)[coingeckoId]["usd"])
 			var solutionModel models.Solution
 
 			db.GetClient().Raw("SELECT * FROM solution WHERE name = ?", solution.Name).Scan(&solutionModel)
-			solutionModel.TokenPrice = tokenPrice
+			solutionModel.TokenPriceFloat = tokenPrice
 			db.GetClient().Save(&solutionModel)
 
 		}

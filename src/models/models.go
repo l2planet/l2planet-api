@@ -21,23 +21,23 @@ func (Chain) TableName() string { return "chains" }
 
 type Solution struct {
 	gorm.Model
-	ChainID     string         `json:"chain_id"`
-	StringID    string         `json:"string_id"`
-	Categories  pq.StringArray `gorm:"type:text[]" json:"categories"`
-	Name        string         `gorm:"unique;not null" json:"name"`
-	Icon        string         `json:"icon"`
-	Website     string         `json:"website"`
-	Twitter     string         `json:"twitter"`
-	Github      string         `json:"github"`
-	Videos      pq.StringArray `gorm:"type:text[]" json:"video"`
-	CoinGecko   string         `json:"gecko"`
-	Investors   pq.StringArray `gorm:"type:text[]" json:"investors"`
-	Description string         `json:"description"`
-	Token       string         `json:"token"`
-	TokenPrice  string         `json:"token_price"`
-	Bridges     []Bridge
-	Projects    pq.StringArray `gorm:"type:text[]" json:"projects"`
-	EvmID       int            `json:"evm_id"`
+	ChainID         string         `json:"chain_id"`
+	StringID        string         `json:"string_id"`
+	Categories      pq.StringArray `gorm:"type:text[]" json:"categories"`
+	Name            string         `gorm:"unique;not null" json:"name"`
+	Icon            string         `json:"icon"`
+	Website         string         `json:"website"`
+	Twitter         string         `json:"twitter"`
+	Github          string         `json:"github"`
+	Videos          pq.StringArray `gorm:"type:text[]" json:"video"`
+	CoinGecko       string         `json:"gecko"`
+	Investors       pq.StringArray `gorm:"type:text[]" json:"investors"`
+	Description     string         `json:"description"`
+	Token           string         `json:"token"`
+	TokenPriceFloat float64        `json:"token_price"`
+	Bridges         []Bridge
+	Projects        pq.StringArray `gorm:"type:text[]" json:"projects"`
+	EvmID           int            `json:"evm_id"`
 }
 
 func (Solution) TableName() string { return "solution" }

@@ -35,24 +35,24 @@ type HistoricalTvl struct {
 }
 
 type SolutionWithTvl struct {
-	Categories  pq.StringArray `gorm:"type:text[]" json:"categories"`
-	ChainID     string         `json:"chain_id"`
-	StringID    string         `json:"string_id"`
-	ID          uint           `json:"id"`
-	Name        string         `json:"name"`
-	Icon        string         `json:"icon"`
-	Website     string         `json:"website"`
-	Twitter     string         `json:"twitter"`
-	Github      string         `json:"github"`
-	Videos      pq.StringArray `gorm:"type:text[]" json:"videos"`
-	Investors   pq.StringArray `gorm:"type:text[]" json:"investors"`
-	Description string         `json:"description"`
-	Token       string         `json:"token"`
-	TokenPrice  string         `json:"token_price"`
-	Projects    pq.StringArray `gorm:"type:text[]" json:"projects"`
-	SolutionID  string         `json:"solution_id"`
-	TvlValue    float64        `json:"tvl"`
-	Tvls        HistoricalTvl  `json:"tvls"`
+	Categories      pq.StringArray `gorm:"type:text[]" json:"categories"`
+	ChainID         string         `json:"chain_id"`
+	StringID        string         `json:"string_id"`
+	ID              uint           `json:"id"`
+	Name            string         `json:"name"`
+	Icon            string         `json:"icon"`
+	Website         string         `json:"website"`
+	Twitter         string         `json:"twitter"`
+	Github          string         `json:"github"`
+	Videos          pq.StringArray `gorm:"type:text[]" json:"videos"`
+	Investors       pq.StringArray `gorm:"type:text[]" json:"investors"`
+	Description     string         `json:"description"`
+	Token           string         `json:"token"`
+	TokenPriceFloat float64        `json:"token_price"`
+	Projects        pq.StringArray `gorm:"type:text[]" json:"projects"`
+	SolutionID      string         `json:"solution_id"`
+	TvlValue        float64        `json:"tvl"`
+	Tvls            HistoricalTvl  `json:"tvls"`
 }
 
 type HistoricalTvlModel struct {
