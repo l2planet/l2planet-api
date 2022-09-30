@@ -48,7 +48,7 @@ type SolutionWithTvl struct {
 	Investors       pq.StringArray `gorm:"type:text[]" json:"investors"`
 	Description     string         `json:"description"`
 	Token           string         `json:"token"`
-	TokenPriceFloat float64        `json:"token_price"`
+	TokenPriceFloat float64        `json:"price"`
 	Projects        pq.StringArray `gorm:"type:text[]" json:"projects"`
 	SolutionID      string         `json:"solution_id"`
 	TvlValue        float64        `json:"tvl"`

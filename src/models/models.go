@@ -34,7 +34,7 @@ type Solution struct {
 	Investors       pq.StringArray `gorm:"type:text[]" json:"investors"`
 	Description     string         `json:"description"`
 	Token           string         `json:"token"`
-	TokenPriceFloat float64        `json:"token_price"`
+	TokenPriceFloat float64        `json:"price"`
 	Bridges         []Bridge
 	Projects        pq.StringArray `gorm:"type:text[]" json:"projects"`
 	EvmID           string         `json:"evm_id"`
