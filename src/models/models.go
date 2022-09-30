@@ -112,9 +112,9 @@ func (Tvl) TableName() string { return "tvls" }
 
 type Newsletter struct {
 	gorm.Model
-	UserName string `json:"username"`
-	Text     string `json:"text"`
-	UsersID  uint   `json:"user_id"`
+	UserName   string `json:"username"`
+	Newsletter string `json:"newsletter"`
+	UsersID    uint   `json:"user_id"`
 }
 
 func (Newsletter) TableName() string { return "newsletters" }

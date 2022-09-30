@@ -101,7 +101,7 @@ func NewProject(c *gin.Context) {
 		return
 	}
 	var solution models.Solution
-	for _,l2 := project.Layer2IDs {
+	for _, l2 := range project.Layer2IDs {
 		db.GetClient().Raw("SELECT * FROM solution WHERE string_id = ?", l2).Scan(&solution)
 		solution.Projects = append(solution.Projects, project.StringID)
 		db.GetClient().Save(&solution)
