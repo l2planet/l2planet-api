@@ -183,7 +183,7 @@ func Info(c *gin.Context) {
 
 	responseMap := make(map[string]interface{}, 0)
 	responseMap["chains"] = chainsMap
-	responseMap["solutions"] = solutionsMap
+	responseMap["layer2s"] = solutionsMap
 	responseMap["projects"] = projectsMap
 	responseMap["latest_newsletter"] = newsletter
 
