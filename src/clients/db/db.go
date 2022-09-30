@@ -54,6 +54,7 @@ type SolutionWithTvl struct {
 	TvlValue        float64        `json:"tvl"`
 	Tvls            HistoricalTvl  `json:"tvls"`
 	CoinGecko       string         `json:"gecko"`
+	EvmID           string         `json:"evm_id"`
 }
 
 type HistoricalTvlModel struct {

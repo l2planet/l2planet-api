@@ -37,7 +37,7 @@ type Solution struct {
 	TokenPriceFloat float64        `json:"token_price"`
 	Bridges         []Bridge
 	Projects        pq.StringArray `gorm:"type:text[]" json:"projects"`
-	EvmID           int            `json:"evm_id"`
+	EvmID           string         `json:"evm_id"`
 }
 
 func (Solution) TableName() string { return "solution" }
