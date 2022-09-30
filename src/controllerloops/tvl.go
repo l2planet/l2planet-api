@@ -131,17 +131,14 @@ func CalculateTvl() error {
 	prices, _ := coinGeckoClient.GetPrices(cgSymbolList)
 	tx := db.GetClient().DB.Begin()
 	for _, solution := range solutionConfigs {
-		if solution.Tokens != nil {
-			tokenPrices := make([]string, 0)
-			for _, token := range solution.Tokens {
-				coingeckoId := tokenConfig[token].CoingeckoId
-				tokenPrices = append(tokenPrices, fmt.Sprintf("%f", (*prices)[coingeckoId]["usd"]))
-			}
+		if solution.Token != "" {
+			coingeckoId := tokenConfig[solution.Token].CoingeckoId
+			tokenPrice := fmt.Sprintf("%f", (*prices)[coingeckoId]["usd"])
 
 			var solutionModel models.Solution
 
 			db.GetClient().Raw("SELECT * FROM solution WHERE name = ?", solution.Name).Scan(&solutionModel)
-			solutionModel.TokenPrices = tokenPrices
+			solutionModel.TokenPrice = tokenPrice
 			db.GetClient().Save(&solutionModel)
 
 		}

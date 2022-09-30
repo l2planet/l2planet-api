@@ -25,13 +25,13 @@ type BridgeConfig struct {
 type SolutionConfig struct {
 	Bridges     []BridgeConfig `yaml:"bridges"`
 	Name        string         `yaml:"name"`
-	Tokens      []string       `yaml:"tokens"`
+	Token       string         `yaml:"tokens"`
 	Description string         `yaml:"description"`
 }
 
 type HistoricalTvl struct {
-	Daily  []string
-	Yearly []string
+	Daily  []string `json:"daily"`
+	Yearly []string `json:"yearly"`
 }
 
 type SolutionWithTvl struct {
@@ -43,11 +43,11 @@ type SolutionWithTvl struct {
 	Website     string         `json:"website"`
 	Twitter     string         `json:"twitter"`
 	Github      string         `json:"github"`
-	Video       string         `json:"video"`
+	Videos      pq.StringArray `gorm:"type:text[]" json:"videos"`
 	Investors   pq.StringArray `gorm:"type:text[]" json:"investors"`
 	Description string         `json:"description"`
-	Tokens      pq.StringArray `gorm:"type:text[]"`
-	TokenPrices pq.StringArray `gorm:"type:text[]" json:"token_prices"`
+	Token       string         `json:"token"`
+	TokenPrice  string         `json:"token_price"`
 	Projects    pq.StringArray `gorm:"type:text[]" json:"projects"`
 	SolutionID  string         `json:"solution_id"`
 	TvlValue    float64        `json:"tvl"`
@@ -179,7 +179,7 @@ func (c *Client) SyncDb() error {
 
 		solution := &models.Solution{
 			Name:        chainConfig.Name,
-			Tokens:      chainConfig.Tokens,
+			Token:       chainConfig.Token,
 			Description: chainConfig.Description,
 		}
 

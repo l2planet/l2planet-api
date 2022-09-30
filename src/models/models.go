@@ -27,11 +27,12 @@ type Solution struct {
 	Website     string         `json:"website"`
 	Twitter     string         `json:"twitter"`
 	Github      string         `json:"github"`
-	Video       string         `json:"video"`
+	Videos      pq.StringArray `gorm:"type:text[]" json:"video"`
+	CoinGecko   string         `json:"gecko"`
 	Investors   pq.StringArray `gorm:"type:text[]" json:"investors"`
 	Description string         `json:"description"`
-	Tokens      pq.StringArray `gorm:"type:text[]" json:"tokens"`
-	TokenPrices pq.StringArray `gorm:"type:text[]" json:"token_prices"`
+	Token       string         `json:"token"`
+	TokenPrice  string         `json:"token_price"`
 	Bridges     []Bridge
 	Projects    pq.StringArray `gorm:"type:text[]" json:"projects"`
 	EvmID       int            `json:"evm_id"`

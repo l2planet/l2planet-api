@@ -1,6 +1,5 @@
 name: "Loopring"
-tokens:
-- LRC
+tokens: "LRC"
 description: "Loopring's zkRollup L2 solution aims to offer the same security guarantees as Ethereum mainnet, with a big scalability boost: throughput increased by 1000x, and cost reduced to just 0.1% of L1."
 bridges:
 - address: 0x674bdf20A0F284D710BC40872100128e2d66Bd3f
