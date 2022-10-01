@@ -2,6 +2,8 @@ package db
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -52,14 +54,31 @@ type SolutionWithTvl struct {
 	Projects        pq.StringArray `gorm:"type:text[]" json:"projects"`
 	SolutionID      string         `json:"solution_id"`
 	TvlValue        float64        `json:"tvl"`
-	Tvls            HistoricalTvl  `json:"tvls"`
 	CoinGecko       string         `json:"gecko"`
 	EvmID           string         `json:"evm_id"`
 }
 
+type InfoResponse struct {
+	SolutionWithTvl
+	Tvls Tvl `json:"tvls"`
+}
+
+type Tvl struct {
+	Daily     []HistoricalTvlElem `json:"daily"`
+	Weekly    []HistoricalTvlElem `json:"weekly"`
+	Monthly   []HistoricalTvlElem `json:"monthly"`
+	Quarterly []HistoricalTvlElem `json:"quarterly"`
+	Yearly    []HistoricalTvlElem `json:"yearly"`
+}
+
 type HistoricalTvlModel struct {
-	Name       string
-	Historical pq.StringArray `gorm:"type:text[]"`
+	Name  string `json:"name"`
+	Elems []HistoricalTvlElem
+}
+
+type HistoricalTvlElem struct {
+	V float64 `json:"v"`
+	T string  `json:"t"`
 }
 
 var client *Client
@@ -136,17 +155,30 @@ func (c *Client) GetLatestNewsletter() (models.Newsletter, error) {
 	return newsletter, nil
 }
 
-func (c *Client) GetAllTvlsWithLength(truncateBy string, count int) ([]HistoricalTvlModel, error) {
-	var historical []HistoricalTvlModel
-	if err := c.Raw("SELECT  sbtwithrow.name,array_agg('{ \"t\": ' || sbtwithrow.timestamp || ', \"v\": ' || sbtwithrow.tvl_value || '}') as historical FROM (SELECT ROW_NUMBER() OVER (PARTITION BY sbt.solution_id ORDER BY sbt.name) AS r,sbt.id,sbt.name,sbt.tvl_value,sbt.timestamp FROM (SELECT DISTINCT ON (date_trunc(?, bridgetvl.timestamp), solution.id) * FROM solution INNER JOIN (SELECT bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id ORDER BY solution.id, date_trunc(?, bridgetvl.timestamp), bridgetvl.timestamp  DESC) as sbt) as sbtwithrow WHERE sbtwithrow.r <= ? GROUP BY sbtwithrow.name", truncateBy, truncateBy, count).Scan(&historical).Error; err != nil {
+func (c *Client) GetAllTvlsWithLength(truncateBy string, count int) (map[string][]HistoricalTvlElem, error) {
+	historicalTvlMap := make(map[string][]HistoricalTvlElem)
+	rows, err := c.Raw("SELECT  sbtwithrow.name,json_agg(json_build_object('t', TO_CHAR(sbtwithrow.timestamp,'Mon DD'), 'v' , sbtwithrow.tvl_value)) FROM (SELECT ROW_NUMBER() OVER (PARTITION BY sbt.solution_id ORDER BY sbt.name) AS r,sbt.id,sbt.name,sbt.tvl_value,sbt.timestamp FROM (SELECT DISTINCT ON (date_trunc(?, bridgetvl.timestamp), solution.id) * FROM solution INNER JOIN (SELECT bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id ORDER BY solution.id, date_trunc(?, bridgetvl.timestamp), bridgetvl.timestamp  DESC) as sbt) as sbtwithrow WHERE sbtwithrow.r <= ? GROUP BY sbtwithrow.name", truncateBy, truncateBy, count).Rows()
+	defer rows.Close()
+	if err != nil {
 		return nil, err
 	}
-	return historical, nil
+	for rows.Next() {
+		var elems []HistoricalTvlElem
+		var name, tvls string
+		rows.Scan(&name, &tvls)
+		if err := json.Unmarshal([]byte(tvls), &elems); err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		historicalTvlMap[name] = elems
+	}
+
+	return historicalTvlMap, nil
 }
 
 func (c *Client) GetAllSolutionsWithTvl() ([]SolutionWithTvl, error) {
 	var solutionWithTvls []SolutionWithTvl
-	if err := c.Raw("SELECT * FROM solution OUTER JOIN (SELECT DISTINCT ON(bridges.solution_id) bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id").Scan(&solutionWithTvls).Error; err != nil {
+	if err := c.Raw("SELECT * FROM solution FULL JOIN (SELECT DISTINCT ON(bridges.solution_id) bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id").Scan(&solutionWithTvls).Error; err != nil {
 		return nil, err
 	}
 

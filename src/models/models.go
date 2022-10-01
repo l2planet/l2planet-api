@@ -38,6 +38,7 @@ type Solution struct {
 	Bridges         []Bridge
 	Projects        pq.StringArray `gorm:"type:text[]" json:"projects"`
 	EvmID           string         `json:"evm_id"`
+	Status          string         `json:"status"`
 }
 
 func (Solution) TableName() string { return "solution" }

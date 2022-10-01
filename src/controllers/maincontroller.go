@@ -111,6 +111,7 @@ func NewProject(c *gin.Context) {
 }
 
 func Info(c *gin.Context) {
+	infoResponse := make([]db.InfoResponse, 0)
 	cacheRes, err := redis.GetClient().Get(context.TODO(), "info").Result()
 	if err == nil {
 		c.Data(http.StatusOK, "application/json", []byte(cacheRes))
@@ -140,10 +141,6 @@ func Info(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
-	dailyMap := make(map[string][]string)
-	for _, v := range daily {
-		dailyMap[v.Name] = v.Historical
-	}
 
 	yearly, err := db.GetClient().GetAllTvlsWithLength("day", 365)
 	if err != nil {
@@ -151,21 +148,22 @@ func Info(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
-	yearlyMap := make(map[string][]string)
-	for _, v := range yearly {
-		yearlyMap[v.Name] = v.Historical
+
+	for _, sol := range solutionsWithTvl {
+		infoResponse = append(infoResponse, db.InfoResponse{
+			SolutionWithTvl: sol,
+			Tvls: db.Tvl{
+				Daily:     daily[sol.Name],
+				Weekly:    yearly[sol.Name],
+				Monthly:   yearly[sol.Name],
+				Quarterly: yearly[sol.Name],
+				Yearly:    yearly[sol.Name],
+			},
+		})
 	}
 
-	for i, sol := range solutionsWithTvl {
-
-		solutionsWithTvl[i].Tvls = db.HistoricalTvl{
-			Daily:  dailyMap[sol.Name],
-			Yearly: yearlyMap[sol.Name],
-		}
-	}
-
-	solutionsMap := make(map[string]db.SolutionWithTvl)
-	for _, solution := range solutionsWithTvl {
+	solutionsMap := make(map[string]db.InfoResponse)
+	for _, solution := range infoResponse {
 		solutionsMap[solution.StringID] = solution
 	}
 
