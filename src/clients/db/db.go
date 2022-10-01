@@ -146,7 +146,7 @@ func (c *Client) GetAllTvlsWithLength(truncateBy string, count int) ([]Historica
 
 func (c *Client) GetAllSolutionsWithTvl() ([]SolutionWithTvl, error) {
 	var solutionWithTvls []SolutionWithTvl
-	if err := c.Raw("SELECT * FROM solution INNER JOIN (SELECT DISTINCT ON(bridges.solution_id) bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id").Scan(&solutionWithTvls).Error; err != nil {
+	if err := c.Raw("SELECT * FROM solution OUTER JOIN (SELECT DISTINCT ON(bridges.solution_id) bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id").Scan(&solutionWithTvls).Error; err != nil {
 		return nil, err
 	}
 
