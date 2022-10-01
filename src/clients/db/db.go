@@ -56,6 +56,7 @@ type SolutionWithTvl struct {
 	TvlValue        float64        `json:"tvl"`
 	CoinGecko       string         `json:"gecko"`
 	EvmID           string         `json:"evm_id"`
+	Status          string         `json:"status"`
 }
 
 type InfoResponse struct {
