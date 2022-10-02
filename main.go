@@ -17,11 +17,6 @@ import (
 	"github.com/l2planet/l2planet-api/src/models"
 )
 
-const (
-	identityKey  = "id"
-	identityName = "name"
-)
-
 func main() {
 
 	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Users{}, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{})
@@ -47,13 +42,13 @@ func main() {
 		Key:         []byte(consts.JwtSecret),
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
-		IdentityKey: identityKey,
+		IdentityKey: consts.IdentityKey,
 		PayloadFunc: func(data interface{}) jwt.MapClaims {
 			v, ok := data.(*models.Users)
 			if ok {
 				return jwt.MapClaims{
-					identityKey:  v.ID,
-					identityName: v.Username,
+					consts.IdentityKey:  v.ID,
+					consts.IdentityName: v.Username,
 				}
 			}
 			return jwt.MapClaims{}
@@ -61,9 +56,9 @@ func main() {
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
 			return &models.Users{
-				Username: claims[identityName].(string),
+				Username: claims[consts.IdentityName].(string),
 				Model: gorm.Model{
-					ID: uint(claims[identityKey].(float64)),
+					ID: uint(claims[consts.IdentityKey].(float64)),
 				},
 			}
 		},

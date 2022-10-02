@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"time"
 
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/clients/redis"
+	"github.com/l2planet/l2planet-api/src/consts"
 	"github.com/l2planet/l2planet-api/src/models"
 )
 
@@ -39,12 +41,16 @@ func Register(c *gin.Context) {
 }
 
 func NewNewsletter(c *gin.Context) {
+	claims := jwt.ExtractClaims(c)
+
 	var newsletter models.Newsletter
 	if err := c.BindJSON(&newsletter); err != nil {
 		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, nil)
 		return
 	}
+	newsletter.UserName = claims[consts.IdentityName].(string)
+	newsletter.UsersID = claims[consts.IdentityKey].(uint)
 
 	if err := db.GetClient().Create(&newsletter).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, nil)
