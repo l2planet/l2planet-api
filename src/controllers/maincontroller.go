@@ -50,7 +50,7 @@ func NewNewsletter(c *gin.Context) {
 		return
 	}
 	newsletter.UserName = claims[consts.IdentityName].(string)
-	newsletter.UsersID = claims[consts.IdentityKey].(uint)
+	newsletter.UsersID = uint(claims[consts.IdentityKey].(float64))
 
 	if err := db.GetClient().Create(&newsletter).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, nil)
