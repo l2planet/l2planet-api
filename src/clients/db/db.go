@@ -156,9 +156,9 @@ func (c *Client) GetLatestNewsletter() (models.Newsletter, error) {
 	return newsletter, nil
 }
 
-func (c *Client) GetAllTvlsWithLength(truncateBy string, count int) (map[string][]HistoricalTvlElem, error) {
+func (c *Client) GetAllTvlsWithLength(truncateBy, dateFormat string, count int) (map[string][]HistoricalTvlElem, error) {
 	historicalTvlMap := make(map[string][]HistoricalTvlElem)
-	rows, err := c.Raw("SELECT  sbtwithrow.name,json_agg(json_build_object('t', TO_CHAR(sbtwithrow.timestamp,'Mon DD'), 'v' , sbtwithrow.tvl_value)) FROM (SELECT ROW_NUMBER() OVER (PARTITION BY sbt.solution_id ORDER BY sbt.name) AS r,sbt.id,sbt.name,sbt.tvl_value,sbt.timestamp FROM (SELECT DISTINCT ON (date_trunc(?, bridgetvl.timestamp), solution.id) * FROM solution INNER JOIN (SELECT bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id ORDER BY solution.id, date_trunc(?, bridgetvl.timestamp), bridgetvl.timestamp  DESC) as sbt) as sbtwithrow WHERE sbtwithrow.r <= ? GROUP BY sbtwithrow.name", truncateBy, truncateBy, count).Rows()
+	rows, err := c.Raw("SELECT  sbtwithrow.name,json_agg(json_build_object('t', TO_CHAR(sbtwithrow.timestamp,?), 'v' , sbtwithrow.tvl_value) ORDER BY sbtwithrow.timestamp) FROM (SELECT ROW_NUMBER() OVER (PARTITION BY sbt.solution_id ORDER BY sbt.name) AS r,sbt.id,sbt.name,sbt.tvl_value,sbt.timestamp FROM (SELECT DISTINCT ON (date_trunc(?, bridgetvl.timestamp), solution.id) * FROM solution INNER JOIN (SELECT bridges.solution_id,sum(tvls.value) as tvl_value,tvls.timestamp FROM bridges INNER JOIN tvls on bridges.id = tvls.bridge_id GROUP BY solution_id,tvls.timestamp ORDER BY bridges.solution_id,tvls.timestamp DESC) as bridgetvl ON solution.id = bridgetvl.solution_id ORDER BY solution.id, date_trunc(?, bridgetvl.timestamp), bridgetvl.timestamp  DESC) as sbt) as sbtwithrow WHERE sbtwithrow.r <= ? GROUP BY sbtwithrow.name", dateFormat, truncateBy, truncateBy, count).Rows()
 	defer rows.Close()
 	if err != nil {
 		return nil, err
