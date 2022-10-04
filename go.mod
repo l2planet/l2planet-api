@@ -3,8 +3,10 @@ module github.com/l2planet/l2planet-api
 go 1.19
 
 require (
+	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/alethio/web3-multicall-go v0.0.15 // indirect
+	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/appleboy/gin-jwt/v2 v2.9.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -28,6 +30,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/gotk3/gotk3 v0.6.1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.13.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
@@ -50,6 +53,9 @@ require (
 	github.com/rjeczalik/notify v0.9.2 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/sourcegraph/go-webkit2 v0.0.0-20170811231113-ade305cf91f4 // indirect
+	github.com/sourcegraph/webloop v0.0.0-20210830205015-abd9d7573123 // indirect
+	github.com/sqs/gojs v0.0.0-20170522041006-12d0b3282819 // indirect
 	github.com/superoo7/go-gecko v1.0.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.5.0 // indirect

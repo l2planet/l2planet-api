@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/l2planet/l2planet-api/src/clients/coingecko"
 	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/clients/ethereum"
@@ -221,5 +223,58 @@ func getBalance(ethClient *ethereum.Client, bridgeAddress, tokenAddress string, 
 	tokenValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(decimals)))
 
 	return tokenValue, nil
-
 }
+
+func CalculateFees() {
+	res, err := http.Get("https://l2fees.info")
+	if err != nil {
+		fmt.Println("Error occured while getting page: ", err)
+		return
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		fmt.Println("Error occured while parsing response body: ", err)
+		return
+	}
+
+	doc.Find(".jsx-3095944076.item").Each(func(i int, s *goquery.Selection) {
+
+		nameDiv := s.Find(".jsx-569913960.name").First()
+		name := nameDiv.Find(".jsx-569913960").First().Text()
+		// For each item found, get the title
+		fee := s.Find(".amount").First().Text()
+		fee2 := s.Find(".amount").First().Next().Text()
+		fmt.Println(name, " : ", fee, ", ", fee2)
+	})
+	fmt.Println("scraping done")
+}
+
+/*
+func CalculateTps() {
+	gtk.Init(nil)
+	go func() {
+		runtime.LockOSThread()
+		gtk.Main()
+	}()
+
+	ctx := webloop.New()
+	view := ctx.NewView()
+	defer view.Close()
+	view.Open("https://ethtps.info")
+	err := view.Wait()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to load URL: %s", err)
+		os.Exit(1)
+	}
+	res, err := view.EvaluateJavaScript("document.title")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to run JavaScript: %s", err)
+		os.Exit(1)
+	}
+
+	fmt.Println(res)
+
+	fmt.Println("scraping done")
+}
+*/
