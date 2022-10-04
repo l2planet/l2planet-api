@@ -7,13 +7,16 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/gotk3/gotk3/gtk"
 	"github.com/l2planet/l2planet-api/src/clients/coingecko"
 	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/clients/ethereum"
 	"github.com/l2planet/l2planet-api/src/models"
+	"github.com/sourcegraph/webloop"
 )
 
 const (
@@ -252,6 +255,56 @@ func CalculateFees() {
 
 /*
 func CalculateTps() {
+	res, err := http.Get("https://l2fees.info")
+	if err != nil {
+		fmt.Println("Error occured while getting page: ", err)
+	}
+	body, _ := ioutil.ReadAll(res.Body)
+	fmt.Println(string(body))
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		fmt.Println("Error occured while parsing response body: ", err)
+		return
+	}
+
+	// we want the first <script> tag from the html
+	firstScript := doc.Find("script").First().Next()
+
+	vm := otto.New()
+	fmt.Println(firstScript.Text())
+	// eval the javascript inside the <script> tag
+	_, err = vm.Run(firstScript.Text())
+	if err != nil {
+		return
+	}
+
+	// traverse down the object path: window > POST_DATA > <videoID> > videoDashURL
+	wVal, err := vm.Get("window")
+	if err != nil {
+		return
+	}
+	valtest, _ := getValueFromObject(wVal, "test")
+
+	fmt.Println(valtest.ToString())
+}
+
+func getValueFromObject(val otto.Value, key string) (*otto.Value, error) {
+	if !val.IsObject() {
+		return nil, errors.New("passed val is not an Object")
+	}
+
+	valObj := val.Object()
+
+	obj, err := valObj.Get(key)
+	if err != nil {
+		return nil, err
+	}
+
+	return &obj, nil
+}
+*/
+
+func CalculateTps() {
 	gtk.Init(nil)
 	go func() {
 		runtime.LockOSThread()
@@ -277,4 +330,3 @@ func CalculateTps() {
 
 	fmt.Println("scraping done")
 }
-*/

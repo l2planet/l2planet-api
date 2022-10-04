@@ -22,6 +22,7 @@ func main() {
 	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Users{}, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{})
 	//db.GetClient().SyncDb()
 
+	controllerloops.CalculateTps()
 	ticker := time.NewTicker(15 * time.Minute)
 	done := make(chan bool)
 	go func() {
