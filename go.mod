@@ -8,6 +8,7 @@ require (
 	github.com/alethio/web3-multicall-go v0.0.15 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/appleboy/gin-jwt/v2 v2.9.0 // indirect
+	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/deckarep/golang-set v1.8.0 // indirect
@@ -58,6 +59,7 @@ require (
 	github.com/sourcegraph/webloop v0.0.0-20210830205015-abd9d7573123 // indirect
 	github.com/sqs/gojs v0.0.0-20170522041006-12d0b3282819 // indirect
 	github.com/superoo7/go-gecko v1.0.0 // indirect
+	github.com/tebeka/selenium v0.9.9 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.5.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect

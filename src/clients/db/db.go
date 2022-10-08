@@ -19,6 +19,15 @@ const (
 	localDir    = "./config/"
 )
 
+type Tps struct {
+	Data []TpsData `json:"data"`
+}
+
+type TpsData struct {
+	Date  string  `json:"date"`
+	Value float64 `json:"value"`
+}
+
 type BridgeConfig struct {
 	Address string   `yaml:"address"`
 	Tokens  []string `yaml:"tokens"`
@@ -57,6 +66,8 @@ type SolutionWithTvl struct {
 	CoinGecko       string         `json:"gecko"`
 	EvmID           string         `json:"evm_id"`
 	Status          string         `json:"status"`
+	Fee             float64        `json:"fee"`
+	Tps             float64        `json:"tps"`
 }
 
 type InfoResponse struct {

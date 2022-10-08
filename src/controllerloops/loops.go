@@ -3,24 +3,57 @@ package controllerloops
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"math/big"
 	"net/http"
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/gotk3/gotk3/gtk"
 	"github.com/l2planet/l2planet-api/src/clients/coingecko"
 	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/clients/ethereum"
 	"github.com/l2planet/l2planet-api/src/models"
-	"github.com/sourcegraph/webloop"
 )
 
 const (
 	localDir = "./config/"
+)
+
+var (
+	feeNameConverter = map[string]string{
+		"Loopring":       "Loopring",
+		"ZKSync":         "zkSync",
+		"Arbitrum One":   "Arbitrum One",
+		"Metis Network":  "Metis Andromeda",
+		"Boba Network":   "Boba Network",
+		"Aztec Network":  "Aztec",
+		"Optimism":       "Optimism",
+		"Polygon Hermez": "Polygon Hermez",
+	}
+	tpsNameConverter = map[string]string{
+		"Loopring":       "Loopring",
+		"ZKSync":         "zkSync",
+		"Arbitrum One":   "Arbitrum One",
+		"Metis":          "Metis Andromeda",
+		"Boba Network":   "Boba Network",
+		"Aztec":          "Aztec",
+		"Optimism":       "Optimism",
+		"Polygon Hermez": "Polygon Hermez",
+		"Starknet":       "StarkNet",
+		"Arbitrum Nova":  "Arbitrum Nova",
+		"Immutable X":    "Immutable X",
+		"Sorare":         "Sorare",
+		"ZKSwap":         "ZKSwap 1.0",
+		"ZKSpace":        "ZKSpace",
+		"DeversiFi":      "rhino.fi",
+		"OMG Network":    "OMG Network",
+		"Fuel":           "Fuel v1",
+		"dYdX":           "dYdX",
+		"Gluon":          "Gluon",
+		"Layer2.Finance": "Layer2.Finance",
+	}
 )
 
 type BridgeConfig struct {
@@ -228,105 +261,74 @@ func getBalance(ethClient *ethereum.Client, bridgeAddress, tokenAddress string, 
 	return tokenValue, nil
 }
 
-func CalculateFees() {
+func CalculateFees() error {
 	res, err := http.Get("https://l2fees.info")
 	if err != nil {
 		fmt.Println("Error occured while getting page: ", err)
-		return
+		return err
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
 		fmt.Println("Error occured while parsing response body: ", err)
-		return
+		return err
 	}
 
 	doc.Find(".jsx-3095944076.item").Each(func(i int, s *goquery.Selection) {
-
 		nameDiv := s.Find(".jsx-569913960.name").First()
 		name := nameDiv.Find(".jsx-569913960").First().Text()
 		// For each item found, get the title
 		fee := s.Find(".amount").First().Text()
 		fee2 := s.Find(".amount").First().Next().Text()
 		fmt.Println(name, " : ", fee, ", ", fee2)
+		var solution models.Solution
+		transformedName := feeNameConverter[name]
+		if transformedName != "" {
+			if tx := db.GetClient().Raw("SELECT * FROM solution WHERE name = ?", transformedName).Scan(&solution); tx.Error == nil && tx.RowsAffected != 0 {
+				solution.Fee = fee
+				db.GetClient().Save(&solution)
+			}
+		}
+
 	})
-	fmt.Println("scraping done")
+	return nil
 }
 
-/*
-func CalculateTps() {
-	res, err := http.Get("https://l2fees.info")
+func CalculateTps() error {
+	var TpsMap map[string][]db.Tps
+
+	res, err := http.Get("https://api.ethtps.info/API/TPS/Get?Provider=All&Network=Mainnet&interval=OneMonth")
 	if err != nil {
 		fmt.Println("Error occured while getting page: ", err)
+		return err
 	}
-	body, _ := ioutil.ReadAll(res.Body)
-	fmt.Println(string(body))
-	doc, err := goquery.NewDocumentFromReader(res.Body)
+
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println("Error occured while parsing response body: ", err)
-		return
+		fmt.Println("error occured while reading response body: ", err)
+		return err
 	}
 
-	// we want the first <script> tag from the html
-	firstScript := doc.Find("script").First().Next()
-
-	vm := otto.New()
-	fmt.Println(firstScript.Text())
-	// eval the javascript inside the <script> tag
-	_, err = vm.Run(firstScript.Text())
-	if err != nil {
-		return
+	if err := json.Unmarshal(body, &TpsMap); err != nil {
+		fmt.Println("Could not unmarshall tps data: ", err)
+		return err
 	}
 
-	// traverse down the object path: window > POST_DATA > <videoID> > videoDashURL
-	wVal, err := vm.Get("window")
-	if err != nil {
-		return
+	for k, v := range TpsMap {
+		total := float64(0)
+		for _, val := range v {
+			total += val.Data[0].Value
+		}
+
+		total = total / float64(len(v))
+		var sol models.Solution
+		transformedName := tpsNameConverter[k]
+		if transformedName != "" {
+			if tx := db.GetClient().Raw("SELECT * FROM solution WHERE name = ?", transformedName).Scan(&sol); tx.Error == nil && tx.RowsAffected != 0 {
+				sol.Tps = fmt.Sprintf("%f", total)
+				db.GetClient().Save(&sol)
+			}
+		}
 	}
-	valtest, _ := getValueFromObject(wVal, "test")
-
-	fmt.Println(valtest.ToString())
-}
-
-func getValueFromObject(val otto.Value, key string) (*otto.Value, error) {
-	if !val.IsObject() {
-		return nil, errors.New("passed val is not an Object")
-	}
-
-	valObj := val.Object()
-
-	obj, err := valObj.Get(key)
-	if err != nil {
-		return nil, err
-	}
-
-	return &obj, nil
-}
-*/
-
-func CalculateTps() {
-	gtk.Init(nil)
-	go func() {
-		runtime.LockOSThread()
-		gtk.Main()
-	}()
-
-	ctx := webloop.New()
-	view := ctx.NewView()
-	defer view.Close()
-	view.Open("https://ethtps.info")
-	err := view.Wait()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to load URL: %s", err)
-		os.Exit(1)
-	}
-	res, err := view.EvaluateJavaScript("document.title")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to run JavaScript: %s", err)
-		os.Exit(1)
-	}
-
-	fmt.Println(res)
-
-	fmt.Println("scraping done")
+	return nil
 }

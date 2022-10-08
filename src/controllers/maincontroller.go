@@ -148,7 +148,7 @@ func Info(c *gin.Context) {
 		return
 	}
 
-	yearly, err := db.GetClient().GetAllTvlsWithLength("day", "Mon DD", 365)
+	yearly, err := db.GetClient().GetAllTvlsWithLength("day", "yyyy-mm--dd", 365)
 	if err != nil {
 
 		c.JSON(http.StatusInternalServerError, nil)

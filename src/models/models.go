@@ -17,6 +17,13 @@ type Chain struct {
 	Solutions   pq.StringArray `json:"layer2s" gorm:"type:text[]"`
 }
 
+type Stats struct {
+	gorm.Model
+	Fee        float64
+	Tps        float64
+	SolutionID uint
+}
+
 func (Chain) TableName() string { return "chains" }
 
 type Solution struct {
@@ -39,6 +46,8 @@ type Solution struct {
 	Projects        pq.StringArray `gorm:"type:text[]" json:"projects"`
 	EvmID           string         `json:"evm_id"`
 	Status          string         `json:"status"`
+	Fee             string         `json:"fee" gorm:"default:'0'"`
+	Tps             string         `json:"tps" gorm:"default:'0'"`
 }
 
 func (Solution) TableName() string { return "solution" }
