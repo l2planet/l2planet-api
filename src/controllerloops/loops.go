@@ -279,8 +279,7 @@ func CalculateFees() error {
 		name := nameDiv.Find(".jsx-569913960").First().Text()
 		// For each item found, get the title
 		fee := s.Find(".amount").First().Text()
-		fee2 := s.Find(".amount").First().Next().Text()
-		fmt.Println(name, " : ", fee, ", ", fee2)
+		//fee2 := s.Find(".amount").First().Next().Text()
 		var solution models.Solution
 		transformedName := feeNameConverter[name]
 		if transformedName != "" {

@@ -140,14 +140,14 @@ func Info(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
+	/*
+		daily, err := db.GetClient().GetAllTvlsWithLength("hour", "HH24:00", 24)
+		if err != nil {
 
-	daily, err := db.GetClient().GetAllTvlsWithLength("hour", "HH24:00", 24)
-	if err != nil {
-
-		c.JSON(http.StatusInternalServerError, nil)
-		return
-	}
-
+			c.JSON(http.StatusInternalServerError, nil)
+			return
+		}
+	*/
 	yearly, err := db.GetClient().GetAllTvlsWithLength("day", "yyyy-mm--dd", 365)
 	if err != nil {
 
@@ -156,16 +156,17 @@ func Info(c *gin.Context) {
 	}
 
 	for _, sol := range solutionsWithTvl {
-		length := len(yearly[sol.Name])
+		//length := len(yearly[sol.Name])
 		infoResponse = append(infoResponse, db.InfoResponse{
 			SolutionWithTvl: sol,
-			Tvls: db.Tvl{
+			Tvls:            yearly[sol.Name],
+			/*db.Tvl{
 				Daily:     daily[sol.Name],
 				Weekly:    yearly[sol.Name][positiveOrZero(length-7):],
 				Monthly:   yearly[sol.Name][positiveOrZero(length-30):],
 				Quarterly: yearly[sol.Name][positiveOrZero(length-90):],
 				Yearly:    yearly[sol.Name],
-			},
+			},*/
 		})
 	}
 
