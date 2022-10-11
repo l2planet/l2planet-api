@@ -66,7 +66,8 @@ type SolutionWithTvl struct {
 	CoinGecko       string         `json:"gecko"`
 	EvmID           string         `json:"evm_id"`
 	Status          string         `json:"status"`
-	Fee             string         `json:"fee"`
+	Send            string         `json:"send" gorm:"default:'0'"`
+	Swap            string         `json:"swap" gorm:"default:'0'"`
 	Tps             string         `json:"tps"`
 }
 

@@ -278,13 +278,14 @@ func CalculateFees() error {
 		nameDiv := s.Find(".jsx-569913960.name").First()
 		name := nameDiv.Find(".jsx-569913960").First().Text()
 		// For each item found, get the title
-		fee := s.Find(".amount").First().Text()
-		//fee2 := s.Find(".amount").First().Next().Text()
+		send := s.Find(".amount").First().Text()
+		swap := s.Find(".amount").First().Next().Text()
 		var solution models.Solution
 		transformedName := feeNameConverter[name]
 		if transformedName != "" {
 			if tx := db.GetClient().Raw("SELECT * FROM solution WHERE name = ?", transformedName).Scan(&solution); tx.Error == nil && tx.RowsAffected != 0 {
-				solution.Fee = fee
+				solution.Send = send
+				solution.Swap = swap
 				db.GetClient().Save(&solution)
 			}
 		}

@@ -46,7 +46,8 @@ type Solution struct {
 	Projects        pq.StringArray `gorm:"type:text[]" json:"projects"`
 	EvmID           string         `json:"evm_id"`
 	Status          string         `json:"status"`
-	Fee             string         `json:"fee" gorm:"default:'0'"`
+	Send            string         `json:"send" gorm:"default:'0'"`
+	Swap            string         `json:"swap" gorm:"default:'0'"`
 	Tps             string         `json:"tps" gorm:"default:'0'"`
 }
 
