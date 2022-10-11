@@ -8,6 +8,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -278,8 +279,8 @@ func CalculateFees() error {
 		nameDiv := s.Find(".jsx-569913960.name").First()
 		name := nameDiv.Find(".jsx-569913960").First().Text()
 		// For each item found, get the title
-		send := s.Find(".amount").First().Text()
-		swap := s.Find(".amount").First().Next().Text()
+		send := strings.ReplaceAll(s.Find(".amount").First().Text(), "$", "")
+		swap := strings.ReplaceAll(s.Find(".amount").First().Next().Text(), "$", "")
 		var solution models.Solution
 		transformedName := feeNameConverter[name]
 		if transformedName != "" {
