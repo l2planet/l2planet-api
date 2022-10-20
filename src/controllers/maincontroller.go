@@ -10,6 +10,7 @@ import (
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 
 	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/clients/redis"
@@ -76,6 +77,31 @@ func NewChain(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
+func PatchChain(c *gin.Context) {
+	var chain models.Chain
+	var chainQuery models.Chain
+	if err := c.BindJSON(&chain); err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, nil)
+		return
+	}
+	if err := db.GetClient().First(&chainQuery, "string_id = ?", chain.StringID).Error; err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	chain.ID = chainQuery.ID
+
+	if err := db.GetClient().Save(&chain).Error; err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
 func NewSolution(c *gin.Context) {
 	var solution models.Solution
 	if err := c.BindJSON(&solution); err != nil {
@@ -91,6 +117,44 @@ func NewSolution(c *gin.Context) {
 	db.GetClient().Raw("SELECT * FROM chains WHERE string_id = ?", solution.ChainID).Scan(&chain)
 	chain.Solutions = append(chain.Solutions, solution.StringID)
 	db.GetClient().Save(&chain)
+
+	c.JSON(http.StatusOK, nil)
+}
+
+func PatchSolution(c *gin.Context) {
+	var solution models.Solution
+	var solutionQuery models.Solution
+	var bridgeQuery models.Bridge
+	if err := c.BindJSON(&solution); err != nil {
+		c.JSON(http.StatusBadRequest, nil)
+		return
+	}
+
+	if err := db.GetClient().First(&solutionQuery, "string_id = ?", solution.StringID).Error; err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	solution.ID = solutionQuery.ID
+
+	for i, bridge := range solution.Bridges {
+		if err := db.GetClient().First(&bridgeQuery, "contract_adress = ?", bridge.ContractAdress).Error; err != nil && err != gorm.ErrRecordNotFound {
+			fmt.Println(err)
+			c.JSON(http.StatusInternalServerError, nil)
+			return
+		} else if err == gorm.ErrRecordNotFound {
+			continue
+		}
+		solution.Bridges[i].ID = bridgeQuery.ID
+
+	}
+
+	if err := db.GetClient().Save(&solution).Error; err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
 
 	c.JSON(http.StatusOK, nil)
 }
@@ -116,7 +180,96 @@ func NewProject(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
+func PatchProject(c *gin.Context) {
+	var project models.Project
+	var projectQuery models.Project
+	if err := c.BindJSON(&project); err != nil {
+		c.JSON(http.StatusBadRequest, nil)
+		return
+	}
+
+	if err := db.GetClient().First(&projectQuery, "string_id = ?", project.StringID).Error; err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+	project.ID = projectQuery.ID
+
+	if err := db.GetClient().Save(&project).Error; err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+func Raw(c *gin.Context) {
+	responseMap := make(map[string]interface{}, 0)
+	cacheRes, err := redis.GetClient().Get(context.TODO(), "raw").Result()
+	if err == nil {
+		c.Data(http.StatusOK, "application/json", []byte(cacheRes))
+		return
+	}
+
+	chains, err := db.GetClient().GetAllChains()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+	chainsMap := make(map[string]models.Chain)
+	for _, chain := range chains {
+		chainsMap[chain.StringID] = chain
+	}
+	responseMap["chains"] = chainsMap
+
+	solutions, err := db.GetClient().GetAllSolutionsWithBridges()
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	solutionsMap := make(map[string]models.Solution)
+	for _, solution := range solutions {
+		solutionsMap[solution.StringID] = solution
+	}
+	responseMap["layer2s"] = solutionsMap
+
+	projects, err := db.GetClient().GetAllProjects()
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	projectsMap := make(map[string]models.Project)
+	for _, project := range projects {
+		projectsMap[project.StringID] = project
+	}
+	responseMap["projects"] = projectsMap
+
+	newsletter, err := db.GetClient().GetAllNewsletters()
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+	responseMap["newsletters"] = newsletter
+
+	responseBody, err := json.Marshal(responseMap)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	redis.GetClient().Set(context.TODO(), "raw", string(responseBody), 5*time.Minute).Result()
+
+	c.Data(http.StatusOK, "application/json", responseBody)
+}
+
 func Info(c *gin.Context) {
+	responseMap := make(map[string]interface{}, 0)
 	infoResponse := make([]db.InfoResponse, 0)
 	cacheRes, err := redis.GetClient().Get(context.TODO(), "info").Result()
 	if err == nil {
@@ -133,6 +286,7 @@ func Info(c *gin.Context) {
 	for _, chain := range chains {
 		chainsMap[chain.StringID] = chain
 	}
+	responseMap["chains"] = chainsMap
 
 	solutionsWithTvl, err := db.GetClient().GetAllSolutionsWithTvl()
 	if err != nil {
@@ -174,6 +328,7 @@ func Info(c *gin.Context) {
 	for _, solution := range infoResponse {
 		solutionsMap[solution.StringID] = solution
 	}
+	responseMap["layer2s"] = solutionsMap
 
 	projects, err := db.GetClient().GetAllProjects()
 	if err != nil {
@@ -186,6 +341,7 @@ func Info(c *gin.Context) {
 	for _, project := range projects {
 		projectsMap[project.StringID] = project
 	}
+	responseMap["projects"] = projectsMap
 
 	newsletter, err := db.GetClient().GetLatestNewsletter()
 	if err != nil {
@@ -193,11 +349,6 @@ func Info(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
-
-	responseMap := make(map[string]interface{}, 0)
-	responseMap["chains"] = chainsMap
-	responseMap["layer2s"] = solutionsMap
-	responseMap["projects"] = projectsMap
 	responseMap["latest_newsletter"] = newsletter
 
 	responseBody, err := json.Marshal(responseMap)
@@ -207,11 +358,7 @@ func Info(c *gin.Context) {
 	}
 
 	redis.GetClient().Set(context.TODO(), "info", string(responseBody), 5*time.Minute).Result()
-
-	//c.PureJSON(http.StatusOK, string(responseBody))
 	c.Data(http.StatusOK, "application/json", responseBody)
-	//c.PureJSON()
-	//c.String(http.StatusOK, "%s", string(responseBody))
 }
 
 func positiveOrZero(num int) int {

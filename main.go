@@ -150,6 +150,10 @@ func main() {
 	auth.POST("/chain", controllers.NewChain)
 	auth.POST("/newsletter", controllers.NewNewsletter)
 
+	auth.PATCH("/solution", controllers.PatchSolution)
+	auth.PATCH("/project", controllers.PatchProject)
+	auth.PATCH("/chain", controllers.PatchChain)
+
 	r.Run(":8080")
 
 }

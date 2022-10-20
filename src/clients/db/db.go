@@ -158,6 +158,16 @@ func (c *Client) GetAllProjects() ([]models.Project, error) {
 	return projects, nil
 }
 
+func (c *Client) GetAllNewsletters() ([]models.Newsletter, error) {
+	var newsletters []models.Newsletter
+
+	if err := c.DB.Find(&newsletters).Error; err != nil {
+		return nil, err
+	}
+
+	return newsletters, nil
+}
+
 func (c *Client) GetLatestNewsletter() (models.Newsletter, error) {
 	var newsletter models.Newsletter
 
@@ -187,6 +197,15 @@ func (c *Client) GetAllTvlsWithLength(truncateBy, dateFormat string, count int) 
 	}
 
 	return historicalTvlMap, nil
+}
+
+func (c *Client) GetAllSolutionsWithBridges() ([]models.Solution, error) {
+	var solutions []models.Solution
+	if err := c.Raw("SELECT * FROM solution INNER JOIN bridges").Scan(&solutions).Error; err != nil {
+		return nil, err
+	}
+
+	return solutions, nil
 }
 
 func (c *Client) GetAllSolutionsWithTvl() ([]SolutionWithTvl, error) {

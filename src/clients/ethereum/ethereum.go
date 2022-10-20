@@ -99,6 +99,7 @@ func (client *Client) BalanceAt(address string) (*big.Int, error) {
 	if err != nil {
 		return big.NewInt(0), err
 	}
+
 	return balance, nil
 }
 
