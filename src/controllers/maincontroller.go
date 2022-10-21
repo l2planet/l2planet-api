@@ -268,6 +268,61 @@ func Raw(c *gin.Context) {
 	c.Data(http.StatusOK, "application/json", responseBody)
 }
 
+func RawLayer2(c *gin.Context) {
+	cacheRes, err := redis.GetClient().Get(context.TODO(), "raw_layer2").Result()
+	if err == nil {
+		c.Data(http.StatusOK, "application/json", []byte(cacheRes))
+		return
+	}
+
+	solutions, err := db.GetClient().GetAllSolutionsWithBridges()
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	solutionsMap := make(map[string]models.Solution)
+	for _, solution := range solutions {
+		solutionsMap[solution.StringID] = solution
+	}
+
+	responseBody, err := json.Marshal(solutionsMap)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	redis.GetClient().Set(context.TODO(), "raw_layer2", string(responseBody), 5*time.Minute).Result()
+
+	c.Data(http.StatusOK, "application/json", responseBody)
+}
+
+func RawNewsletter(c *gin.Context) {
+	cacheRes, err := redis.GetClient().Get(context.TODO(), "raw_newsletter").Result()
+	if err == nil {
+		c.Data(http.StatusOK, "application/json", []byte(cacheRes))
+		return
+	}
+
+	newsletter, err := db.GetClient().GetAllNewsletters()
+	if err != nil {
+
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	responseBody, err := json.Marshal(newsletter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	redis.GetClient().Set(context.TODO(), "raw_newsletter", string(responseBody), 5*time.Minute).Result()
+
+	c.Data(http.StatusOK, "application/json", responseBody)
+}
+
 func Info(c *gin.Context) {
 	responseMap := make(map[string]interface{}, 0)
 	infoResponse := make([]db.InfoResponse, 0)

@@ -143,6 +143,8 @@ func main() {
 	r.POST("/register", controllers.Register)
 	r.GET("/info", controllers.Info)
 	r.GET("/raw", controllers.Raw)
+	r.GET("/raw_layer2", controllers.RawLayer2)
+	r.GET("/raw_newsletter", controllers.RawNewsletter)
 
 	auth := r.Group("/auth")
 	auth.Use(authMiddleware.MiddlewareFunc())
