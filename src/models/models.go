@@ -42,7 +42,7 @@ type Solution struct {
 	Description     string         `json:"description"`
 	Token           string         `json:"token"`
 	TokenPriceFloat float64        `json:"price"`
-	Bridges         []Bridge
+	Bridges         []Bridge       `json:"bridges"`
 	Projects        pq.StringArray `gorm:"type:text[]" json:"projects"`
 	EvmID           string         `json:"evm_id"`
 	Status          string         `json:"status"`
