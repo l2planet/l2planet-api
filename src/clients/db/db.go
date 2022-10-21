@@ -201,7 +201,7 @@ func (c *Client) GetAllTvlsWithLength(truncateBy, dateFormat string, count int) 
 
 func (c *Client) GetAllSolutionsWithBridges() ([]models.Solution, error) {
 	var solutions []models.Solution
-	if err := c.Raw("SELECT * FROM solution INNER JOIN bridges").Scan(&solutions).Error; err != nil {
+	if err := c.Raw("SELECT * FROM solution FULL JOIN bridges ON solution.id = bridges.solution_id").Scan(&solutions).Error; err != nil {
 		return nil, err
 	}
 
