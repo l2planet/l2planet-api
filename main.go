@@ -142,6 +142,7 @@ func main() {
 	r.POST("/login", authMiddleware.LoginHandler)
 	r.POST("/register", controllers.Register)
 	r.GET("/info", controllers.Info)
+	r.GET("/raw", controllers.Raw)
 
 	auth := r.Group("/auth")
 	auth.Use(authMiddleware.MiddlewareFunc())
