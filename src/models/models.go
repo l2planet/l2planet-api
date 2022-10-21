@@ -36,7 +36,7 @@ type Solution struct {
 	Website         string         `json:"website"`
 	Twitter         string         `json:"twitter"`
 	Github          string         `json:"github"`
-	Videos          pq.StringArray `gorm:"type:text[]" json:"video"`
+	Videos          pq.StringArray `gorm:"type:text[]" json:"videos"`
 	CoinGecko       string         `json:"gecko"`
 	Investors       pq.StringArray `gorm:"type:text[]" json:"investors"`
 	Description     string         `json:"description"`

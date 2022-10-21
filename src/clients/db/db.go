@@ -201,7 +201,9 @@ func (c *Client) GetAllTvlsWithLength(truncateBy, dateFormat string, count int) 
 
 func (c *Client) GetAllSolutionsWithBridges() ([]models.Solution, error) {
 	var solutions []models.Solution
-	if err := c.Raw("SELECT * FROM solution FULL JOIN bridges ON solution.id = bridges.solution_id").Scan(&solutions).Error; err != nil {
+	//tx := c.Raw("SELECT *,json_agg(json_build_object('contract_address', bridges.contract_address, 'v' , sbtwithrow.tvl_value::numeric(20,0)) FROM solution FULL JOIN bridges ON solution.id = bridges.solution_id")
+	if err := c.Preload("Bridges").Find(&solutions).Error; err != nil {
+		//if err := tx.Scan(&solutions).Error; err != nil {
 		return nil, err
 	}
 
