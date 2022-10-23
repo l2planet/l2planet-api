@@ -14,7 +14,7 @@ type Chain struct {
 	Name        string         `json:"name" gorm:"not null"`
 	Description string         `json:"description" gorm:"not null"`
 	EvmID       int            `jspn:"evm_id"`
-	Solutions   pq.StringArray `json:"layer2s" gorm:"type:text[]"`
+	Solutions   pq.StringArray `json:"layer2s,omitempty" gorm:"type:text[]"`
 }
 
 type Stats struct {
@@ -30,20 +30,20 @@ type Solution struct {
 	gorm.Model
 	ChainID         string         `json:"chain_id"`
 	StringID        string         `json:"string_id"`
-	Categories      pq.StringArray `gorm:"type:text[]" json:"categories"`
+	Categories      pq.StringArray `gorm:"type:text[]" json:"categories,omitempty"`
 	Name            string         `gorm:"unique;not null" json:"name"`
 	Icon            string         `json:"icon"`
 	Website         string         `json:"website"`
 	Twitter         string         `json:"twitter"`
 	Github          string         `json:"github"`
-	Videos          pq.StringArray `gorm:"type:text[]" json:"videos"`
+	Videos          pq.StringArray `gorm:"type:text[]" json:"videos,omitempty"`
 	CoinGecko       string         `json:"gecko"`
-	Investors       pq.StringArray `gorm:"type:text[]" json:"investors"`
+	Investors       pq.StringArray `gorm:"type:text[]" json:"investors,omitempty"`
 	Description     string         `json:"description"`
 	Token           string         `json:"token"`
 	TokenPriceFloat float64        `json:"price"`
 	Bridges         []Bridge       `json:"bridges"`
-	Projects        pq.StringArray `gorm:"type:text[]" json:"projects"`
+	Projects        pq.StringArray `gorm:"type:text[]" json:"projects,omitempty"`
 	EvmID           string         `json:"evm_id"`
 	Status          string         `json:"status"`
 	Send            string         `json:"send" gorm:"default:'0'"`
@@ -63,7 +63,7 @@ type Project struct {
 	Twitter     string         `json:"twitter"`
 	Github      string         `json:"github"`
 	Video       string         `json:"video"`
-	Categories  pq.StringArray `json:"categories" gorm:"type:text[]"`
+	Categories  pq.StringArray `json:"categories,omitempty" gorm:"type:text[]"`
 	SolutionID  uint           `gorm:"not null"`
 	Layer2IDs   pq.StringArray `json:"l2_ids" gorm:"type:text[]"`
 }
