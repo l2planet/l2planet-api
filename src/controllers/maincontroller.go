@@ -65,8 +65,6 @@ func NewNewsletter(c *gin.Context) {
 
 func NewChain(c *gin.Context) {
 	log.Printf("New Chain")
-	body, _ := ioutil.ReadAll(c.Request.Body)
-	println(string(body))
 	var chain models.Chain
 	if err := c.BindJSON(&chain); err != nil {
 		fmt.Println(err)
@@ -84,8 +82,6 @@ func NewChain(c *gin.Context) {
 
 func PatchChain(c *gin.Context) {
 	log.Printf("Patch Chain")
-	body, _ := ioutil.ReadAll(c.Request.Body)
-	println(string(body))
 	var chain models.Chain
 	var chainQuery models.Chain
 	if err := c.BindJSON(&chain); err != nil {
@@ -112,15 +108,15 @@ func PatchChain(c *gin.Context) {
 
 func NewSolution(c *gin.Context) {
 	log.Printf("New Solution")
-	body, _ := ioutil.ReadAll(c.Request.Body)
-	println(string(body))
 	var solution models.Solution
 	if err := c.BindJSON(&solution); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, nil)
 		return
 	}
 
 	if err := db.GetClient().Create(&solution).Error; err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
@@ -134,11 +130,11 @@ func NewSolution(c *gin.Context) {
 
 func PatchSolution(c *gin.Context) {
 	log.Printf("Patch Solution")
-	body, _ := ioutil.ReadAll(c.Request.Body)
-	println(string(body))
 	var solution models.Solution
 	var solutionQuery models.Solution
 	if err := c.BindJSON(&solution); err != nil {
+		fmt.Println("patch solution error")
+                fmt.Println(err)
 		c.JSON(http.StatusBadRequest, nil)
 		return
 	}
@@ -182,6 +178,7 @@ func NewProject(c *gin.Context) {
 	println(string(body))
 	var project models.Project
 	if err := c.BindJSON(&project); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, nil)
 		return
 	}
@@ -207,6 +204,7 @@ func PatchProject(c *gin.Context) {
 	var project models.Project
 	var projectQuery models.Project
 	if err := c.BindJSON(&project); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, nil)
 		return
 	}
