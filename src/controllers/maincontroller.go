@@ -60,6 +60,7 @@ func NewNewsletter(c *gin.Context) {
 		return
 	}
 
+	redis.GetClient().Del(context.TODO(), "info", "raw_layer2")
 	c.JSON(http.StatusOK, nil)
 }
 
@@ -77,6 +78,7 @@ func NewChain(c *gin.Context) {
 		return
 	}
 
+	redis.GetClient().Del(context.TODO(), "info", "raw_layer2")
 	c.JSON(http.StatusOK, nil)
 }
 
@@ -103,6 +105,7 @@ func PatchChain(c *gin.Context) {
 		return
 	}
 
+	redis.GetClient().Del(context.TODO(), "info", "raw_layer2")
 	c.JSON(http.StatusOK, nil)
 }
 
@@ -125,6 +128,7 @@ func NewSolution(c *gin.Context) {
 	chain.Solutions = append(chain.Solutions, solution.StringID)
 	db.GetClient().Save(&chain)
 
+	redis.GetClient().Del(context.TODO(), "info", "raw_layer2")
 	c.JSON(http.StatusOK, nil)
 }
 
@@ -134,7 +138,7 @@ func PatchSolution(c *gin.Context) {
 	var solutionQuery models.Solution
 	if err := c.BindJSON(&solution); err != nil {
 		fmt.Println("patch solution error")
-                fmt.Println(err)
+		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, nil)
 		return
 	}
@@ -169,6 +173,7 @@ func PatchSolution(c *gin.Context) {
 		return
 	}
 
+	redis.GetClient().Del(context.TODO(), "info", "raw_layer2")
 	c.JSON(http.StatusOK, nil)
 }
 
@@ -194,6 +199,7 @@ func NewProject(c *gin.Context) {
 		db.GetClient().Save(&solution)
 	}
 
+	redis.GetClient().Del(context.TODO(), "info", "raw_layer2")
 	c.JSON(http.StatusOK, nil)
 }
 
@@ -222,6 +228,7 @@ func PatchProject(c *gin.Context) {
 		return
 	}
 
+	redis.GetClient().Del(context.TODO(), "info", "raw_layer2")
 	c.JSON(http.StatusOK, nil)
 }
 
