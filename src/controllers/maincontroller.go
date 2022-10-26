@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
@@ -62,6 +64,9 @@ func NewNewsletter(c *gin.Context) {
 }
 
 func NewChain(c *gin.Context) {
+	log.Printf("New Chain")
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	println(string(body))
 	var chain models.Chain
 	if err := c.BindJSON(&chain); err != nil {
 		fmt.Println(err)
@@ -78,6 +83,9 @@ func NewChain(c *gin.Context) {
 }
 
 func PatchChain(c *gin.Context) {
+	log.Printf("Patch Chain")
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	println(string(body))
 	var chain models.Chain
 	var chainQuery models.Chain
 	if err := c.BindJSON(&chain); err != nil {
@@ -103,6 +111,9 @@ func PatchChain(c *gin.Context) {
 }
 
 func NewSolution(c *gin.Context) {
+	log.Printf("New Solution")
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	println(string(body))
 	var solution models.Solution
 	if err := c.BindJSON(&solution); err != nil {
 		c.JSON(http.StatusBadRequest, nil)
@@ -122,9 +133,11 @@ func NewSolution(c *gin.Context) {
 }
 
 func PatchSolution(c *gin.Context) {
+	log.Printf("Patch Solution")
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	println(string(body))
 	var solution models.Solution
 	var solutionQuery models.Solution
-	var bridgeQuery models.Bridge
 	if err := c.BindJSON(&solution); err != nil {
 		c.JSON(http.StatusBadRequest, nil)
 		return
@@ -139,6 +152,10 @@ func PatchSolution(c *gin.Context) {
 	solution.ID = solutionQuery.ID
 
 	for i, bridge := range solution.Bridges {
+		if bridge.ContractAdress == "" {
+			continue
+		}
+		bridgeQuery := models.Bridge{}
 		if err := db.GetClient().First(&bridgeQuery, "contract_adress = ?", bridge.ContractAdress).Error; err != nil && err != gorm.ErrRecordNotFound {
 			fmt.Println(err)
 			c.JSON(http.StatusInternalServerError, nil)
@@ -160,6 +177,9 @@ func PatchSolution(c *gin.Context) {
 }
 
 func NewProject(c *gin.Context) {
+	log.Printf("New Project")
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	println(string(body))
 	var project models.Project
 	if err := c.BindJSON(&project); err != nil {
 		c.JSON(http.StatusBadRequest, nil)
@@ -181,6 +201,9 @@ func NewProject(c *gin.Context) {
 }
 
 func PatchProject(c *gin.Context) {
+	log.Printf("Patch Project")
+	body, _ := ioutil.ReadAll(c.Request.Body)
+	println(string(body))
 	var project models.Project
 	var projectQuery models.Project
 	if err := c.BindJSON(&project); err != nil {
