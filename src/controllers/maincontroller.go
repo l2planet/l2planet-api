@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -179,8 +178,6 @@ func PatchSolution(c *gin.Context) {
 
 func NewProject(c *gin.Context) {
 	log.Printf("New Project")
-	body, _ := ioutil.ReadAll(c.Request.Body)
-	println(string(body))
 	var project models.Project
 	if err := c.BindJSON(&project); err != nil {
 		fmt.Println(err)
@@ -205,8 +202,6 @@ func NewProject(c *gin.Context) {
 
 func PatchProject(c *gin.Context) {
 	log.Printf("Patch Project")
-	body, _ := ioutil.ReadAll(c.Request.Body)
-	println(string(body))
 	var project models.Project
 	var projectQuery models.Project
 	if err := c.BindJSON(&project); err != nil {
