@@ -223,6 +223,24 @@ func PatchProject(c *gin.Context) {
 		return
 	}
 
+	var solution models.Solution
+	for _, l2 := range project.Layer2IDs {
+		if err := db.GetClient().Raw("SELECT * FROM solution WHERE string_id = ?", l2).Scan(&solution).Error; err != nil {
+			continue
+		}
+		found := false
+		for _, proj := range solution.Projects {
+			if proj == project.StringID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			solution.Projects = append(solution.Projects, project.StringID)
+			db.GetClient().Save(&solution)
+		}
+	}
+
 	redis.GetClient().Del(context.TODO(), "info", "raw_layer2")
 	c.JSON(http.StatusOK, nil)
 }
