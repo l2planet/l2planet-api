@@ -19,9 +19,8 @@ import (
 
 func main() {
 
-	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Users{}, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{})
+	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Users{}, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{}, &models.ScrapedTvl{})
 	//db.GetClient().SyncDb()
-
 	ticker := time.NewTicker(15 * time.Minute)
 	done := make(chan bool)
 	go func() {
@@ -37,8 +36,12 @@ func main() {
 				if err := controllerloops.CalculateFees(); err != nil {
 					fmt.Println("error while calculating fees", err)
 				}
-				if err := controllerloops.CalculateTvl(); err != nil {
+				ts := time.Now()
+				if err := controllerloops.CalculateTvl(ts); err != nil {
 					fmt.Println("error while calculating tvls", err)
+				}
+				if err := controllerloops.CalculateTvlViaScrape(ts); err != nil {
+					fmt.Println("error while calculating scraped tvls", err)
 				}
 
 			}

@@ -219,6 +219,27 @@ func (c *Client) GetAllSolutionsWithTvl() ([]SolutionWithTvl, error) {
 	return solutionWithTvls, nil
 }
 
+func (c *Client) GetScrapedTvls(truncateBy, dateFormat string, count int) (map[string][]HistoricalTvlElem, error) {
+	historicalTvlMap := make(map[string][]HistoricalTvlElem)
+	rows, err := c.Raw("SELECT  sbtwithrow.name,json_agg(json_build_object('t', EXTRACT(EPOCH FROM sbtwithrow.timestamp)::numeric(20,0)::text, 'v' , sbtwithrow.value::numeric(20,0)) ORDER BY sbtwithrow.timestamp) FROM (SELECT ROW_NUMBER() OVER (PARTITION BY sbt.name ORDER BY sbt.name) AS r,sbt.name,sbt.value,sbt.timestamp FROM (SELECT DISTINCT ON (date_trunc(?, scraped_tvls.timestamp), scraped_tvls.name) * FROM scraped_tvls) as sbt) as sbtwithrow WHERE sbtwithrow.r <= ? GROUP BY sbtwithrow.name", truncateBy, count).Rows()
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var elems []HistoricalTvlElem
+		var name, tvls string
+		rows.Scan(&name, &tvls)
+		if err := json.Unmarshal([]byte(tvls), &elems); err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
+		historicalTvlMap[name] = elems
+	}
+	return historicalTvlMap, nil
+}
+
 func (c *Client) GetSolutionConfig() ([]models.Solution, error) {
 	var solutions []models.Solution
 	if err := c.DB.Model(&models.Solution{}).Preload("Bridges").Find(&solutions).Error; err != nil {

@@ -23,6 +23,9 @@ const (
 )
 
 var (
+	defiLlamaMap = map[string]bool{
+		"Milkomeda": true,
+	}
 	feeNameConverter = map[string]string{
 		"Loopring":       "Loopring",
 		"ZKSync":         "zkSync",
@@ -77,6 +80,14 @@ type TokenConfig struct {
 	Symbol      string `json:"symbol"`
 	Decimals    int    `json:"decimals"`
 	Category    string `json:"category"`
+}
+
+type DefiLlamaResponse struct {
+	GeckoId string  `json:"gecko_id"`
+	Tvl     float64 `json:"tvl"`
+	Symbol  string  `json:"tokenSymbol"`
+	CmcId   string  `json:"cmcId"`
+	Name    string  `json:"name"`
 }
 
 func getTokenConfig() (map[string]TokenConfig, []string, error) {
@@ -160,8 +171,7 @@ func CalculateTvlMulticall() error {
 */
 
 // TODO: instead of querying blockchain one by one, use multicall
-func CalculateTvl() error {
-	ts := time.Now()
+func CalculateTvl(ts time.Time) error {
 	solutionConfigs, _ := db.GetClient().GetSolutionConfig()
 	tokenConfig, cgSymbolList, _ := getTokenConfig()
 	ethClient := ethereum.NewClient()
@@ -328,6 +338,39 @@ func CalculateTps() error {
 			if tx := db.GetClient().Raw("SELECT * FROM solution WHERE name = ?", transformedName).Scan(&sol); tx.Error == nil && tx.RowsAffected != 0 {
 				sol.Tps = fmt.Sprintf("%f", total)
 				db.GetClient().Save(&sol)
+			}
+		}
+	}
+	return nil
+}
+
+func CalculateTvlViaScrape(ts time.Time) error {
+	defiLlamaResponses := make([]DefiLlamaResponse, 0)
+	res, err := http.Get("https://api.llama.fi/chains")
+	if err != nil {
+		fmt.Println("could not get tvl via scrape : ", err)
+		return err
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println("could not read body via scrape : ", err)
+		return err
+	}
+	err = json.Unmarshal(body, &defiLlamaResponses)
+	if err != nil {
+		fmt.Println("could not unmarshall body via scrape : ", err)
+		return err
+	}
+
+	for _, defiLlamaResponse := range defiLlamaResponses {
+		if defiLlamaMap[defiLlamaResponse.Name] {
+			if err := db.GetClient().Create(&models.ScrapedTvl{
+				Name:      defiLlamaResponse.Name,
+				Timestamp: ts,
+				Value:     defiLlamaResponse.Tvl,
+			}).Error; err != nil {
+				fmt.Println("error while inserting tvls of ", defiLlamaResponse.Name)
 			}
 		}
 	}

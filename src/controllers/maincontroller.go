@@ -400,16 +400,27 @@ func Info(c *gin.Context) {
 	*/
 	yearly, err := db.GetClient().GetAllTvlsWithLength("day", "yyyy-mm--dd", 365)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
 
+	yearlyScraped, err := db.GetClient().GetScrapedTvls("day", "yyyy-mm--dd", 365)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, nil)
 		return
 	}
 
 	for _, sol := range solutionsWithTvl {
 		//length := len(yearly[sol.Name])
+		tvlsToBeSelected := make([]db.HistoricalTvlElem, 0)
+		if yearly[sol.Name] != nil {
+			tvlsToBeSelected = yearly[sol.Name]
+		} else if yearlyScraped[sol.Name] != nil {
+			tvlsToBeSelected = yearlyScraped[sol.Name]
+		}
 		infoResponse = append(infoResponse, db.InfoResponse{
 			SolutionWithTvl: sol,
-			Tvls:            yearly[sol.Name],
+			Tvls:            tvlsToBeSelected,
 			/*db.Tvl{
 				Daily:     daily[sol.Name],
 				Weekly:    yearly[sol.Name][positiveOrZero(length-7):],

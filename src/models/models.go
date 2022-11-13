@@ -121,6 +121,17 @@ type Tvl struct {
 
 func (Tvl) TableName() string { return "tvls" }
 
+type ScrapedTvl struct {
+	gorm.Model
+	Value     float64 `sql:"type:decimal(18,4);"`
+	Timestamp time.Time
+	Name      string
+}
+
+func (ScrapedTvl) TableName() string {
+	return "scraped_tvls"
+}
+
 type Newsletter struct {
 	gorm.Model
 	UserName   string `json:"username"`
