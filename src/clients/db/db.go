@@ -54,6 +54,7 @@ type SolutionWithTvl struct {
 	Icon            string         `json:"icon"`
 	Website         string         `json:"website"`
 	Twitter         string         `json:"twitter"`
+	Discord         string         `json:"discord"`
 	Github          string         `json:"github"`
 	Videos          pq.StringArray `gorm:"type:text[]" json:"videos"`
 	Investors       pq.StringArray `gorm:"type:text[]" json:"investors"`
