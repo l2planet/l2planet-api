@@ -149,7 +149,7 @@ func PatchSolution(c *gin.Context) {
 	}
 
 	solution.ID = solutionQuery.ID
-
+	solution.Projects = solutionQuery.Projects
 	for i, bridge := range solution.Bridges {
 		if bridge.ContractAdress == "" {
 			continue
@@ -191,7 +191,10 @@ func NewProject(c *gin.Context) {
 	}
 	var solution models.Solution
 	for _, l2 := range project.Layer2IDs {
-		db.GetClient().Raw("SELECT * FROM solution WHERE string_id = ?", l2).Scan(&solution)
+		if err := db.GetClient().Raw("SELECT * FROM solution WHERE string_id = ?", l2).Scan(&solution).Error; err != nil {
+			fmt.Printf("could not add project %s to solution %s", project.Name, l2)
+			continue
+		}
 		solution.Projects = append(solution.Projects, project.StringID)
 		db.GetClient().Save(&solution)
 	}
@@ -237,7 +240,9 @@ func PatchProject(c *gin.Context) {
 		}
 		if !found {
 			solution.Projects = append(solution.Projects, project.StringID)
-			db.GetClient().Save(&solution)
+			if err := db.GetClient().Save(&solution).Error; err != nil {
+				fmt.Printf("could not add project %s to solution %s", project.Name, l2)
+			}
 		}
 	}
 
