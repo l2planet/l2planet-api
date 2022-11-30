@@ -102,12 +102,12 @@ type EthereumAdapter struct {
 	client      *ethereum.Client
 }
 
-func getTokenConfig() (map[string]TokenConfig, []string, error) {
+func getTokenConfig(chainId string) (map[string]TokenConfig, []string, error) {
 	configDir := os.Getenv("CONFIG_DIR")
 	if configDir == "" {
 		configDir = localDir
 	}
-	dat, _ := os.ReadFile(configDir + "tokens/ethereum/tokens.json")
+	dat, _ := os.ReadFile(configDir + fmt.Sprintf("tokens/%s/tokens.json", chainId))
 	var tokenConfigs []TokenConfig
 	tokenCgIdList := make([]string, 0)
 	if err := json.Unmarshal(dat, &tokenConfigs); err != nil {
@@ -123,9 +123,18 @@ func getTokenConfig() (map[string]TokenConfig, []string, error) {
 	return tokenConfigMap, tokenCgIdList, nil
 }
 
+func CalculateTvlAvalanche(ts time.Time) error {
+	tokenConfigs, cgSymbolList, _ := getTokenConfig("avalanche")
+	solutionConfigs, _ := db.GetClient().GetSolutionConfig("avalanche")
+	avalancheUrl := consts.AvalancheClientUrl
+	client := ethereum.NewClient(avalancheUrl)
+	err := calculateTvlEvm(client, tokenConfigs, cgSymbolList, ts, solutionConfigs)
+	return err
+}
+
 func CalculateTvl(ts time.Time) error {
-	tokenConfigs, cgSymbolList, _ := getTokenConfig()
-	solutionConfigs, _ := db.GetClient().GetSolutionConfig()
+	tokenConfigs, cgSymbolList, _ := getTokenConfig("ethereum")
+	solutionConfigs, _ := db.GetClient().GetSolutionConfig("ethereum")
 	ethUrl := os.Getenv("ETH_URL")
 	if ethUrl == "" {
 		ethUrl = consts.EthClientUrl

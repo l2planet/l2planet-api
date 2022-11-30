@@ -46,6 +46,9 @@ func main() {
 				if err := controllerloops.CalculateTvl(ts); err != nil {
 					fmt.Println("error while calculating tvls", err)
 				}
+				if err := controllerloops.CalculateTvlAvalanche(ts); err != nil {
+					fmt.Println("error while calculating tvls", err)
+				}
 				if err := controllerloops.CalculateTvlViaScrape(ts); err != nil {
 					fmt.Println("error while calculating scraped tvls", err)
 				}
