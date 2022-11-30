@@ -26,6 +26,7 @@ func main() {
 		fmt.Println("error while calculating tvls", err)
 	}
 	done := make(chan bool)
+	ticker := time.NewTicker(15 * time.Minute)
 	go func() {
 		for {
 			select {

@@ -133,6 +133,9 @@ func CalculateTvlAvalanche(ts time.Time) error {
 		fmt.Println(sol.Name, " ")
 		for _, bridge := range sol.Bridges {
 			fmt.Print(bridge.ID, " ", bridge.ContractAdress, " ")
+			for _, tok := range bridge.SupportedTokens {
+				fmt.Print(tok, " ")
+			}
 		}
 		fmt.Println()
 	}
@@ -181,12 +184,14 @@ func calculateTvlEvm(client *ethereum.Client, tokenConfig map[string]TokenConfig
 						//fmt.Printf("balance of the %s token cannot be found: %v \n", name, err)
 						continue
 					}
+
 					//Get Price of the asset
 					coingeckoId := tokenConfig[name].CoingeckoId
 					price := (*prices)[coingeckoId]["usd"]
 					bigPrice := big.NewFloat(float64(price))
 					//calculate total value
 					value := bigPrice.Mul(bigPrice, balance)
+					fmt.Println("name", name, "balance ", balance, "price ", price)
 					tvl = tvl.Add(tvl, value)
 				}
 			} else {
@@ -200,7 +205,7 @@ func calculateTvlEvm(client *ethereum.Client, tokenConfig map[string]TokenConfig
 					coingeckoId := tokenConfig[tokenName].CoingeckoId
 					price := (*prices)[coingeckoId]["usd"]
 					bigPrice := big.NewFloat(float64(price))
-
+					fmt.Println("name", tokenName, "balance ", balance, "price ", price)
 					value := bigPrice.Mul(bigPrice, balance)
 					tvl = tvl.Add(tvl, value)
 				}
