@@ -125,7 +125,17 @@ func getTokenConfig(chainId string) (map[string]TokenConfig, []string, error) {
 
 func CalculateTvlAvalanche(ts time.Time) error {
 	tokenConfigs, cgSymbolList, _ := getTokenConfig("avalanche")
+	for _, token := range tokenConfigs {
+		fmt.Println(token.Name, " ", token.Address)
+	}
 	solutionConfigs, _ := db.GetClient().GetSolutionConfig("avalanche")
+	for _, sol := range solutionConfigs {
+		fmt.Println(sol.Name, " ")
+		for _, bridge := range sol.Bridges {
+			fmt.Print(bridge.ID, " ", bridge.ContractAdress, " ")
+		}
+		fmt.Println()
+	}
 	avalancheUrl := consts.AvalancheClientUrl
 	client := ethereum.NewClient(avalancheUrl)
 	err := calculateTvlEvm(client, tokenConfigs, cgSymbolList, ts, solutionConfigs)

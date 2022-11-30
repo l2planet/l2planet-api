@@ -21,13 +21,10 @@ func main() {
 
 	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Users{}, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{}, &models.ScrapedTvl{})
 	//db.GetClient().SyncDb()
-
-	solutionConfigs, _ := db.GetClient().GetSolutionConfig()
-	for _, sol := range solutionConfigs {
-		fmt.Println(sol.Name)
+	ts := time.Now()
+	if err := controllerloops.CalculateTvlAvalanche(ts); err != nil {
+		fmt.Println("error while calculating tvls", err)
 	}
-	time.Sleep(time.Second * 5)
-	ticker := time.NewTicker(15 * time.Minute)
 	done := make(chan bool)
 	go func() {
 		for {
