@@ -12,9 +12,11 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+
 	"github.com/l2planet/l2planet-api/src/clients/coingecko"
 	"github.com/l2planet/l2planet-api/src/clients/db"
 	"github.com/l2planet/l2planet-api/src/clients/ethereum"
+	"github.com/l2planet/l2planet-api/src/consts"
 	"github.com/l2planet/l2planet-api/src/models"
 )
 
@@ -90,12 +92,22 @@ type DefiLlamaResponse struct {
 	Name    string  `json:"name"`
 }
 
+type TvlAdapter interface {
+	GetTokenConfig() (map[string]TokenConfig, []string, error)
+	CalculateTvl(ts time.Time) error
+}
+
+type EthereumAdapter struct {
+	rpcEndpoint string
+	client      *ethereum.Client
+}
+
 func getTokenConfig() (map[string]TokenConfig, []string, error) {
 	configDir := os.Getenv("CONFIG_DIR")
 	if configDir == "" {
 		configDir = localDir
 	}
-	dat, _ := os.ReadFile(configDir + "tokens/tokens.json")
+	dat, _ := os.ReadFile(configDir + "tokens/ethereum/tokens.json")
 	var tokenConfigs []TokenConfig
 	tokenCgIdList := make([]string, 0)
 	if err := json.Unmarshal(dat, &tokenConfigs); err != nil {
@@ -111,70 +123,20 @@ func getTokenConfig() (map[string]TokenConfig, []string, error) {
 	return tokenConfigMap, tokenCgIdList, nil
 }
 
-/*
-func CalculateTvlMulticall() error {
-	//ts := time.Now()
+func CalculateTvl(ts time.Time) error {
+	tokenConfigs, cgSymbolList, _ := getTokenConfig()
 	solutionConfigs, _ := db.GetClient().GetSolutionConfig()
-	tokenConfig, cgSymbolList, _ := getTokenConfig()
-	ethClient := ethereum.NewClient()
-	coinGeckoClient := coingecko.NewClient()
-	tokenAbi, _ := abi.JSON(strings.NewReader(token.TokenABI))
-	multiCalls := make([]multicall.Multicall2Call, 0)
-	prices, _ := coinGeckoClient.GetPrices(cgSymbolList)
-	for _, solution := range solutionConfigs {
-		for _, bridge := range solution.Bridges {
-			tvl := big.NewFloat(0.00)
-			var bridgeModel models.Bridge
-			db.GetClient().First(&bridgeModel, "contract_adress = ?", bridge.ContractAdress)
-			//if No tokens specified, go over all of them, else iterate over the specified list
-			if len(bridge.SupportedTokens) == 0 {
-				for name := range tokenConfig {
-					bridgeAddr := common.HexToAddress(bridge.ContractAdress)
-					packedData, err := tokenAbi.Pack("balanceOf", bridgeAddr)
-					if err != nil {
-						continue
-					}
-					if tokenConfig[name].Address == "" {
-						continue
-					}
-					tokenAddr := common.HexToAddress(tokenConfig[name].Address)
-					multiCalls = append(multiCalls, multicall.Multicall2Call{
-						Target:   tokenAddr,
-						CallData: packedData,
-					})
-
-				}
-				ethClient.MulticallBalance(multiCalls)
-			} else {
-				for _, tokenName := range bridge.SupportedTokens {
-
-					balance, err := getBalance(ethClient, bridge.ContractAdress, tokenConfig[tokenName].Address, tokenConfig[tokenName].Decimals)
-					if err != nil {
-						fmt.Printf("balance of the %s token cannot be found: %v \n", tokenName, err)
-						continue
-					}
-
-					coingeckoId := tokenConfig[tokenName].CoingeckoId
-					price := (*prices)[coingeckoId]["usd"]
-					bigPrice := big.NewFloat(float64(price))
-
-					value := bigPrice.Mul(bigPrice, balance)
-					tvl = tvl.Add(tvl, value)
-				}
-			}
-			persistedTvl, _ := tvl.Float64()
-			fmt.Println(persistedTvl)
-		}
+	ethUrl := os.Getenv("ETH_URL")
+	if ethUrl == "" {
+		ethUrl = consts.EthClientUrl
 	}
-	return nil
+	client := ethereum.NewClient(ethUrl)
+	err := calculateTvlEvm(client, tokenConfigs, cgSymbolList, ts, solutionConfigs)
+	return err
 }
-*/
 
 // TODO: instead of querying blockchain one by one, use multicall
-func CalculateTvl(ts time.Time) error {
-	solutionConfigs, _ := db.GetClient().GetSolutionConfig()
-	tokenConfig, cgSymbolList, _ := getTokenConfig()
-	ethClient := ethereum.NewClient()
+func calculateTvlEvm(client *ethereum.Client, tokenConfig map[string]TokenConfig, cgSymbolList []string, ts time.Time, solutionConfigs []models.Solution) error {
 	coinGeckoClient := coingecko.NewClient()
 
 	prices, _ := coinGeckoClient.GetPrices(cgSymbolList)
@@ -182,43 +144,35 @@ func CalculateTvl(ts time.Time) error {
 	for _, solution := range solutionConfigs {
 		if solution.Token != "" {
 			coingeckoId := tokenConfig[solution.Token].CoingeckoId
-			//tokenPrice := fmt.Sprintf("%f", (*prices)[coingeckoId]["usd"])
 			tokenPrice := float64((*prices)[coingeckoId]["usd"])
 			var solutionModel models.Solution
-
 			db.GetClient().Raw("SELECT * FROM solution WHERE name = ?", solution.Name).Scan(&solutionModel)
 			solutionModel.TokenPriceFloat = tokenPrice
 			db.GetClient().Save(&solutionModel)
-
 		}
 		for _, bridge := range solution.Bridges {
 			tvl := big.NewFloat(0.00)
 			var bridgeModel models.Bridge
 			db.GetClient().First(&bridgeModel, "contract_adress = ?", bridge.ContractAdress)
-
 			//if No tokens specified, go over all of them, else iterate over the specified list
 			if len(bridge.SupportedTokens) == 0 {
 				for name := range tokenConfig {
-
-					balance, err := getBalance(ethClient, bridge.ContractAdress, tokenConfig[name].Address, tokenConfig[name].Decimals)
+					balance, err := getBalance(client, bridge.ContractAdress, tokenConfig[name].Address, tokenConfig[name].Decimals)
 					if err != nil {
 						//fmt.Printf("balance of the %s token cannot be found: %v \n", name, err)
 						continue
 					}
-
 					//Get Price of the asset
 					coingeckoId := tokenConfig[name].CoingeckoId
 					price := (*prices)[coingeckoId]["usd"]
 					bigPrice := big.NewFloat(float64(price))
-
 					//calculate total value
 					value := bigPrice.Mul(bigPrice, balance)
 					tvl = tvl.Add(tvl, value)
 				}
 			} else {
 				for _, tokenName := range bridge.SupportedTokens {
-
-					balance, err := getBalance(ethClient, bridge.ContractAdress, tokenConfig[tokenName].Address, tokenConfig[tokenName].Decimals)
+					balance, err := getBalance(client, bridge.ContractAdress, tokenConfig[tokenName].Address, tokenConfig[tokenName].Decimals)
 					if err != nil {
 						fmt.Printf("balance of the %s token cannot be found: %v \n", tokenName, err)
 						continue

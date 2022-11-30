@@ -243,7 +243,7 @@ func (c *Client) GetScrapedTvls(truncateBy, dateFormat string, count int) (map[s
 
 func (c *Client) GetSolutionConfig() ([]models.Solution, error) {
 	var solutions []models.Solution
-	if err := c.DB.Model(&models.Solution{}).Preload("Bridges").Find(&solutions).Error; err != nil {
+	if err := c.DB.Model(&models.Solution{}).Preload("Bridges").Find(&solutions, "solution.chain_id = ethereum").Error; err != nil {
 		return nil, err
 	}
 

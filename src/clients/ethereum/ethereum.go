@@ -3,7 +3,6 @@ package ethereum
 import (
 	"context"
 	"math/big"
-	"os"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -12,7 +11,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
-	"github.com/l2planet/l2planet-api/src/consts"
 	"github.com/l2planet/l2planet-api/src/multicall"
 	"github.com/l2planet/l2planet-api/src/token"
 )
@@ -32,12 +30,8 @@ type CallResponse struct {
 	ReturnData []byte `json:"returnData"`
 }
 
-func NewClient() *Client {
-	ethUrl := os.Getenv("ETH_URL")
-	if ethUrl == "" {
-		ethUrl = consts.EthClientUrl
-	}
-	client, _ := ethclient.Dial(ethUrl)
+func NewClient(url string) *Client {
+	client, _ := ethclient.Dial(url)
 
 	mcAbi, err := abi.JSON(strings.NewReader(multicall.MulticallABI))
 	if err != nil {
