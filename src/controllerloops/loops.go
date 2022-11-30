@@ -191,7 +191,6 @@ func calculateTvlEvm(client *ethereum.Client, tokenConfig map[string]TokenConfig
 					bigPrice := big.NewFloat(float64(price))
 					//calculate total value
 					value := bigPrice.Mul(bigPrice, balance)
-					fmt.Println("name", name, "balance ", balance, "price ", price)
 					tvl = tvl.Add(tvl, value)
 				}
 			} else {
@@ -205,7 +204,6 @@ func calculateTvlEvm(client *ethereum.Client, tokenConfig map[string]TokenConfig
 					coingeckoId := tokenConfig[tokenName].CoingeckoId
 					price := (*prices)[coingeckoId]["usd"]
 					bigPrice := big.NewFloat(float64(price))
-					fmt.Println("name", tokenName, "balance ", balance, "price ", price)
 					value := bigPrice.Mul(bigPrice, balance)
 					tvl = tvl.Add(tvl, value)
 				}
