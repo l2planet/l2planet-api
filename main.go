@@ -28,9 +28,6 @@ func main() {
 	if err := controllerloops.CalculateTvlFtm(ts); err != nil {
 		fmt.Println("error while calculating tvls", err)
 	}
-	if err := controllerloops.CalculateTvlMoonbeam(ts); err != nil {
-		fmt.Println("error while calculating tvls", err)
-	}
 	done := make(chan bool)
 	ticker := time.NewTicker(15 * time.Minute)
 	go func() {
