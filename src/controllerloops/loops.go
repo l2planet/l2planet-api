@@ -123,22 +123,40 @@ func getTokenConfig(chainId string) (map[string]TokenConfig, []string, error) {
 	return tokenConfigMap, tokenCgIdList, nil
 }
 
+func CalculateTvlMoonbeam(ts time.Time) error {
+	tokenConfigs, cgSymbolList, _ := getTokenConfig("moonbeam")
+	solutionConfigs, _ := db.GetClient().GetSolutionConfig("moonbeam")
+
+	moonbeamUrl := consts.MoonbeamClientUrl
+	client := ethereum.NewClient(moonbeamUrl)
+	err := calculateTvlEvm(client, tokenConfigs, cgSymbolList, ts, solutionConfigs)
+	return err
+}
+
+func CalculateTvlFtm(ts time.Time) error {
+	tokenConfigs, cgSymbolList, _ := getTokenConfig("fantom")
+	solutionConfigs, _ := db.GetClient().GetSolutionConfig("fantom")
+
+	ftmUrl := consts.FtmClientUrl
+	client := ethereum.NewClient(ftmUrl)
+	err := calculateTvlEvm(client, tokenConfigs, cgSymbolList, ts, solutionConfigs)
+	return err
+}
+
+func CalculateTvlBsc(ts time.Time) error {
+	tokenConfigs, cgSymbolList, _ := getTokenConfig("bnb")
+	solutionConfigs, _ := db.GetClient().GetSolutionConfig("bnb")
+
+	bnbUrl := consts.BscClientUrl
+	client := ethereum.NewClient(bnbUrl)
+	err := calculateTvlEvm(client, tokenConfigs, cgSymbolList, ts, solutionConfigs)
+	return err
+}
+
 func CalculateTvlAvalanche(ts time.Time) error {
 	tokenConfigs, cgSymbolList, _ := getTokenConfig("avalanche")
-	for _, token := range tokenConfigs {
-		fmt.Println(token.Name, " ", token.Address)
-	}
 	solutionConfigs, _ := db.GetClient().GetSolutionConfig("avalanche")
-	for _, sol := range solutionConfigs {
-		fmt.Println(sol.Name, " ")
-		for _, bridge := range sol.Bridges {
-			fmt.Print(bridge.ID, " ", bridge.ContractAdress, " ")
-			for _, tok := range bridge.SupportedTokens {
-				fmt.Print(tok, " ")
-			}
-		}
-		fmt.Println()
-	}
+
 	avalancheUrl := consts.AvalancheClientUrl
 	client := ethereum.NewClient(avalancheUrl)
 	err := calculateTvlEvm(client, tokenConfigs, cgSymbolList, ts, solutionConfigs)
