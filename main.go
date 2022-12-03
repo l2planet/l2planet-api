@@ -22,7 +22,13 @@ func main() {
 	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Users{}, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{}, &models.ScrapedTvl{})
 	//db.GetClient().SyncDb()
 	ts := time.Now()
-	if err := controllerloops.CalculateTvlAvalanche(ts); err != nil {
+	if err := controllerloops.CalculateTvlBsc(ts); err != nil {
+		fmt.Println("error while calculating tvls", err)
+	}
+	if err := controllerloops.CalculateTvlFtm(ts); err != nil {
+		fmt.Println("error while calculating tvls", err)
+	}
+	if err := controllerloops.CalculateTvlMoonbeam(ts); err != nil {
 		fmt.Println("error while calculating tvls", err)
 	}
 	done := make(chan bool)
@@ -45,6 +51,15 @@ func main() {
 					fmt.Println("error while calculating tvls", err)
 				}
 				if err := controllerloops.CalculateTvlAvalanche(ts); err != nil {
+					fmt.Println("error while calculating tvls", err)
+				}
+				if err := controllerloops.CalculateTvlBsc(ts); err != nil {
+					fmt.Println("error while calculating tvls", err)
+				}
+				if err := controllerloops.CalculateTvlFtm(ts); err != nil {
+					fmt.Println("error while calculating tvls", err)
+				}
+				if err := controllerloops.CalculateTvlMoonbeam(ts); err != nil {
 					fmt.Println("error while calculating tvls", err)
 				}
 				if err := controllerloops.CalculateTvlViaScrape(ts); err != nil {
