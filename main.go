@@ -19,7 +19,7 @@ import (
 
 func main() {
 
-	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Users{}, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{}, &models.ScrapedTvl{})
+	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Users{}, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{}, &models.ScrapedTvl{}, &models.Subscribers{})
 	//db.GetClient().SyncDb()
 	ts := time.Now()
 	if err := controllerloops.CalculateTvlBsc(ts); err != nil {
@@ -167,6 +167,7 @@ func main() {
 	r.GET("/raw", controllers.Raw)
 	r.GET("/raw_layer2", controllers.RawLayer2)
 	r.GET("/raw_newsletter", controllers.RawNewsletter)
+	r.POST("/subscribe", controllers.SubsribeNewsletter)
 
 	auth := r.Group("/auth")
 	auth.Use(authMiddleware.MiddlewareFunc())

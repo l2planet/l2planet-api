@@ -479,3 +479,19 @@ func positiveOrZero(num int) int {
 	}
 	return num
 }
+
+func SubsribeNewsletter(c *gin.Context) {
+	var sub models.Subscribers
+	if err := c.BindJSON(&sub); err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusBadRequest, nil)
+		return
+	}
+
+	if err := db.GetClient().Create(&sub).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, nil)
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}

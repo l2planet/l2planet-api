@@ -150,3 +150,10 @@ type Users struct {
 }
 
 func (Users) TableName() string { return "users" }
+
+type Subscribers struct {
+	gorm.Model
+	Email string `json:"email"`
+}
+
+func (Subscribers) TableName() string { return "subscribers" }
