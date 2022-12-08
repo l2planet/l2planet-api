@@ -49,6 +49,7 @@ type Solution struct {
 	Status          string         `json:"status"`
 	Send            string         `json:"send" gorm:"default:'0'"`
 	Swap            string         `json:"swap" gorm:"default:'0'"`
+	Locales         string         `json:"locales"`
 	Tps             string         `json:"tps" gorm:"default:'0'"`
 }
 

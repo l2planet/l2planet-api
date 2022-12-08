@@ -70,6 +70,7 @@ type SolutionWithTvl struct {
 	Send            string         `json:"send" gorm:"default:'0'"`
 	Swap            string         `json:"swap" gorm:"default:'0'"`
 	Tps             string         `json:"tps"`
+	Locales         string         `json:"locales"`
 }
 
 type InfoResponse struct {
