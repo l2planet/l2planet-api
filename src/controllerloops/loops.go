@@ -26,7 +26,8 @@ const (
 
 var (
 	defiLlamaMap = map[string]bool{
-		"Milkomeda": true,
+		"Milkomeda":    true,
+		"Milkomeda A1": true,
 	}
 	feeNameConverter = map[string]string{
 		"Loopring":       "Loopring",
@@ -146,6 +147,9 @@ func CalculateTvlFtm(ts time.Time) error {
 func CalculateTvlBsc(ts time.Time) error {
 	tokenConfigs, cgSymbolList, _ := getTokenConfig("bnb")
 	solutionConfigs, _ := db.GetClient().GetSolutionConfig("bnb")
+	for k, v := range tokenConfigs {
+		fmt.Printf("%s %s %s\n", k, v.CoingeckoId, v.Symbol)
+	}
 
 	bnbUrl := consts.BscClientUrl
 	client := ethereum.NewClient(bnbUrl)
@@ -221,6 +225,7 @@ func calculateTvlEvm(client *ethereum.Client, tokenConfig map[string]TokenConfig
 
 					coingeckoId := tokenConfig[tokenName].CoingeckoId
 					price := (*prices)[coingeckoId]["usd"]
+					fmt.Printf("price of %s: %f \n", tokenName, price)
 					bigPrice := big.NewFloat(float64(price))
 					value := bigPrice.Mul(bigPrice, balance)
 					tvl = tvl.Add(tvl, value)
@@ -248,6 +253,7 @@ func getBalance(ethClient *ethereum.Client, bridgeAddress, tokenAddress string, 
 			return nil, err
 		}
 
+		fmt.Printf("Balance At %s: %s\n", bridgeAddress, balance.String())
 		fbalance := new(big.Float)
 		fbalance.SetString(balance.String())
 		ethValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(decimals)))
@@ -259,6 +265,7 @@ func getBalance(ethClient *ethereum.Client, bridgeAddress, tokenAddress string, 
 		return nil, err
 	}
 
+	fmt.Printf("Balance of %s for %s: %s \n", bridgeAddress, tokenAddress, balance.String())
 	fbalance := new(big.Float)
 	fbalance.SetString(balance.String())
 	tokenValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(decimals)))
