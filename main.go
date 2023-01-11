@@ -159,7 +159,7 @@ func main() {
 	}))
 
 	r.POST("/login", authMiddleware.LoginHandler)
-	r.POST("/register", controllers.Register)
+	//r.POST("/register", controllers.Register)
 	r.GET("/info", controllers.Info)
 	r.GET("/raw", controllers.Raw)
 	r.GET("/raw_layer2", controllers.RawLayer2)
