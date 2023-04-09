@@ -113,7 +113,7 @@ func CalculateMissingTps() {
 		if err != nil {
 			fmt.Print(err)
 		}
-		if tx := db.GetClient().Raw("SELECT * FROM solution WHERE string_id = ?", rpcToName).Scan(&sol); tx.Error == nil && tx.RowsAffected != 0 {
+		if tx := db.GetClient().Raw("SELECT * FROM solution WHERE string_id = ?", rpcToName[rpcUrl]).Scan(&sol); tx.Error == nil && tx.RowsAffected != 0 {
 			sol.Tps = fmt.Sprintf("%f", tps)
 			db.GetClient().Save(&sol)
 		}
