@@ -180,7 +180,11 @@ func CalculateTvl(ts time.Time) error {
 func calculateTvlEvm(client *ethereum.Client, tokenConfig map[string]TokenConfig, cgSymbolList []string, ts time.Time, solutionConfigs []models.Solution) error {
 	coinGeckoClient := coingecko.NewClient()
 
-	prices, _ := coinGeckoClient.GetPrices(cgSymbolList)
+	prices, err := coinGeckoClient.GetPrices(cgSymbolList)
+	if err != nil {
+		fmt.Printf("could not get prices from CG: %v", err)
+		return err
+	}
 	tx := db.GetClient().DB.Begin()
 	for _, solution := range solutionConfigs {
 		if solution.Token != "" {

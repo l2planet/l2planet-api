@@ -21,12 +21,9 @@ func main() {
 
 	db.GetClient().AutoMigrate(&models.Token{}, &models.Solution{}, &models.Bridge{} /*&models.Balance{},*/, &models.Users{}, &models.Newsletter{}, &models.Price{}, &models.Tvl{}, &models.Chain{}, &models.Project{}, &models.ScrapedTvl{}, &models.Subscribers{})
 	//db.GetClient().SyncDb()
-	ts := time.Now()
-	if err := controllerloops.CalculateTvlBsc(ts); err != nil {
-		fmt.Println("error while calculating tvls", err)
-	}
 	done := make(chan bool)
 	ticker := time.NewTicker(15 * time.Minute)
+	controllerloops.CalculateMissingTps()
 	go func() {
 		for {
 			select {
@@ -35,31 +32,31 @@ func main() {
 				return
 			case <-ticker.C:
 				if err := controllerloops.CalculateTps(); err != nil {
-					fmt.Println("error while calculating tvls", err)
+					fmt.Println("error while calculating tps", err)
 				}
 				if err := controllerloops.CalculateFees(); err != nil {
 					fmt.Println("error while calculating fees", err)
 				}
 				ts := time.Now()
 				if err := controllerloops.CalculateTvl(ts); err != nil {
-					fmt.Println("error while calculating tvls", err)
+					fmt.Println("error while calculating tvls eth", err)
 				}
 				if err := controllerloops.CalculateTvlAvalanche(ts); err != nil {
-					fmt.Println("error while calculating tvls", err)
+					fmt.Println("error while calculating tvls avax", err)
 				}
 				if err := controllerloops.CalculateTvlBsc(ts); err != nil {
-					fmt.Println("error while calculating tvls", err)
+					fmt.Println("error while calculating tvls bsc", err)
 				}
 				if err := controllerloops.CalculateTvlFtm(ts); err != nil {
-					fmt.Println("error while calculating tvls", err)
+					fmt.Println("error while calculating tvls ftm", err)
 				}
 				if err := controllerloops.CalculateTvlMoonbeam(ts); err != nil {
-					fmt.Println("error while calculating tvls", err)
+					fmt.Println("error while calculating tvls beam", err)
 				}
 				if err := controllerloops.CalculateTvlViaScrape(ts); err != nil {
 					fmt.Println("error while calculating scraped tvls", err)
 				}
-
+				controllerloops.CalculateMissingTps()
 			}
 		}
 	}()

@@ -3,12 +3,12 @@ version: '3.3'
 services:
   api-v1:
     container_name: api-v1
-    image: docker.io/bdehrioglu/l2planet-api:v0.1.0
+    image: docker.io/bdehrioglu/l2planet-api:v0.4.51
     restart: always
     environment:
       - ETH_URL=https://eth-mainnet.g.alchemy.com/v2/dVblG1Tfi-psOdZvwsZy_T4mxBHaA-e_
     ports:
-      - "80:8080"
+      - "8080:8080"
     depends_on:
       - l2planet_db
       - redis
